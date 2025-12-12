@@ -1,7 +1,0 @@
-
-# === PATCH: install stake80 (rooms) ===
-try:
-    from stake80_rooms import install as _stake_install
-    _stake_install(app)
-except Exception as _e:
-    print("[stake80] install skipped:", _e)
