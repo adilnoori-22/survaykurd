@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Design — تێم/ڕەنگ{% endblock %}
+{% block content %}
+<h2>تێم/ڕەنگ</h2>
+<form method="post" class="card" style="max-width:720px">
+  <div class="row"><label>Primary</label> <input type="color" name="theme_primary" value="{{ data.theme_primary }}"></div>
+  <div class="row"><label>Accent</label>  <input type="color" name="theme_accent"  value="{{ data.theme_accent }}"></div>
+  <div class="row"><label>Background</label><input type="color" name="theme_bg"   value="{{ data.theme_bg }}"></div>
+  <div class="row"><label>Text</label>     <input type="color" name="theme_text" value="{{ data.theme_text }}"></div>
+  <div class="row">
+    <label>Custom CSS (بەدڵخواز)</label>
+    <textarea name="custom_css" rows="10" placeholder=".header{box-shadow:none}">{{ data.custom_css }}</textarea>
+  </div>
+  <div class="row" style="gap:.5rem">
+    <button class="btn" type="submit">پاشەکەوت</button>
+    <a class="btn secondary" href="{{ url_for('admin_dashboard') }}">گەڕانەوە</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}تڕاکینگی فەرمان{% endblock %}
+{% block content %}
+<h2>تڕاکینگی فەرمان</h2>
+{% if not found %}
+  <div class="card">کۆد: <strong>{{ code }}</strong> نەدۆزرایەوە.</div>
+{% else %}
+  <div class="card">
+    <div><strong>ژمارەی فەرمان:</strong> {{ order_id }}</div>
+    <div><strong>کۆدی تڕاکینگ:</strong> {{ code }}</div>
+    <div><strong>دۆخی ئێستا:</strong> <span class="badge">{{ status }}</span></div>
+    <div><strong>دروستکراوە لە:</strong> {{ created_at }}</div>
+  </div>
+{% endif %}
+{% endblock %}

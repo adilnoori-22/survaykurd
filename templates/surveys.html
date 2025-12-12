@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}ڕاپرسیەکان{% endblock %}
+{% block content %}
+{# … سەرەوەی پەیج … #}
+<div class="card">
+  {% for q in questions %}
+    <div class="q-block" id="q-{{ q.id }}" data-qid="{{ q.id }}"
+         {% if q.show_if_json %} data-show-if='{{ q.show_if_json|e }}' {% endif %}>
+
+      <label><b>({{ loop.index }}) {{ q.q_text }}</b></label>
+
+      {# yes/no #}
+      {% if q.q_type == 'yesno' %}
+        <div class="row">
+          <label><input type="radio" name="q{{ q.id }}" value="yes"> بەڵێ</label>
+          <label style="margin-inline-start:1rem"><input type="radio" name="q{{ q.id }}" value="no"> نەخێر</label>
+        </div>
+
+      {# number #}
+      {% elif q.q_type == 'number' %}
+        <input type="number" name="q{{ q.id }}" class="input">
+
+      {# select/radio/checkbox — نمونەی کورت #}
+      {% elif q.q_type in ['select','radio','checkbox'] %}
+        {% set opts = q.options_json and q.options_json | safe %}
+        {# … ئەمە بە شێوەی خۆت پڕ بکە، گرنگە value ـەکان بە هەمان دەق بن … #}
+
+      {% else %}
+        <input type="text" name="q{{ q.id }}" class="input">
+      {% endif %}
+
+      <div class="muted">QID: {{ q.id }}</div>
+    </div>
+  {% endfor %}
+</div>
+
+<h2>هەموو ڕاپرسیەکان</h2>
+{% if session.get('is_admin') %}
+  <p><a class="btn" href="{{ url_for('admin_survey_new') }}">+ دروستکردنی ڕاپرسی</a></p>
+{% endif %}
+<table class="card">
+  <tr><th>سەردێر</th><th>دۆخ</th><th>کردار</th></tr>
+  {% for r in rows %}
+    <tr>
+      <td>{{ r.title }}</td>
+      <td>{{ 'چالاک' if r.is_active else 'وەستا' }}</td>
+      <td>
+        {% if r.is_active %}<a class="btn" href="{{ url_for('survey_fill', survey_id=r.id) }}">پڕکردنەوە</a>{% else %}<span class="badge">وەستا</span>{% endif %}
+        {% if session.get('is_admin') %} | <a href="{{ url_for('admin_survey_questions', survey_id=r.id) }}">پرسیارەکان</a>{% endif %}
+      </td>
+    </tr>
+  {% else %}
+    <tr><td colspan="3">هیچ ڕاپرسییەک نییە.</td></tr>
+  {% endfor %}
+</table>
+{% endblock %}

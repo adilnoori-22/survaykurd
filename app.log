@@ -1,0 +1,109 @@
+2025-08-25 18:14:06,887 WARNING  * Debugger is active!
+2025-08-25 18:14:06,891 INFO  * Debugger PIN: 211-392-838
+2025-08-25 18:16:36,096 INFO [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-25 18:16:36,097 INFO [33mPress CTRL+C to quit[0m
+2025-08-25 18:16:36,099 INFO  * Restarting with stat
+2025-08-25 18:16:36,401 WARNING  * Debugger is active!
+2025-08-25 18:16:36,404 INFO  * Debugger PIN: 211-392-838
+2025-08-25 18:17:37,991 ERROR Unhandled exception:
+Traceback (most recent call last):
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 891, in dispatch_request
+    self.raise_routing_exception(req)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 500, in raise_routing_exception
+    raise request.routing_exception  # type: ignore[misc]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\ctx.py", line 362, in match_request
+    result = self.url_adapter.match(return_rule=True)  # type: ignore
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\werkzeug\routing\map.py", line 629, in match
+    raise NotFound() from None
+werkzeug.exceptions.NotFound: 404 Not Found: The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again.
+
+2025-08-25 18:17:38,036 INFO 127.0.0.1 - - [25/Aug/2025 18:17:38] "[35m[1mGET / HTTP/1.1[0m" 500 -
+2025-08-25 18:17:38,097 INFO 127.0.0.1 - - [25/Aug/2025 18:17:38] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-08-25 18:17:38,118 INFO 127.0.0.1 - - [25/Aug/2025 18:17:38] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1" 200 -
+2025-08-25 18:17:38,146 INFO 127.0.0.1 - - [25/Aug/2025 18:17:38] "GET /?__debugger__=yes&cmd=resource&f=console.png&s=iXBtCYpwDDQ2C7zCq36g HTTP/1.1" 200 -
+2025-08-25 18:17:38,158 INFO 127.0.0.1 - - [25/Aug/2025 18:17:38] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1" 200 -
+2025-08-25 18:21:07,404 ERROR Unhandled exception:
+Traceback (most recent call last):
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\survey_app\app.py", line 158, in register
+    return render_template("register.html")
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\hp\Desktop\survey_app\templates\register.html", line 85, in top-level template code
+    <p>پێشتر هەژمارت هەیە؟ <a href="{{ url_for('login') }}">چوونەژوورەوە</a></p>
+    ^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1121, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1110, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+        endpoint,
+    ...<3 lines>...
+        force_external=_external,
+    )
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'login'. Did you mean 'register' instead?
+
+2025-08-25 18:21:07,417 INFO 127.0.0.1 - - [25/Aug/2025 18:21:07] "[35m[1mGET /register HTTP/1.1[0m" 500 -
+2025-08-25 18:21:07,428 INFO 127.0.0.1 - - [25/Aug/2025 18:21:07] "[36mGET /register?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-08-25 18:21:07,428 INFO 127.0.0.1 - - [25/Aug/2025 18:21:07] "[36mGET /register?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-08-25 18:21:07,462 INFO 127.0.0.1 - - [25/Aug/2025 18:21:07] "GET /register?__debugger__=yes&cmd=resource&f=console.png&s=iXBtCYpwDDQ2C7zCq36g HTTP/1.1" 200 -
+2025-08-25 18:21:07,476 INFO 127.0.0.1 - - [25/Aug/2025 18:21:07] "[36mGET /register?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-08-25 18:21:12,512 ERROR Unhandled exception:
+Traceback (most recent call last):
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 917, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 902, in dispatch_request
+    return self.ensure_sync(self.view_functions[rule.endpoint])(**view_args)  # type: ignore[no-any-return]
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+  File "C:\Users\hp\Desktop\survey_app\app.py", line 158, in register
+    return render_template("register.html")
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 150, in render_template
+    return _render(app, template, context)
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\templating.py", line 131, in _render
+    rv = template.render(context)
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 1295, in render
+    self.environment.handle_exception()
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\jinja2\environment.py", line 942, in handle_exception
+    raise rewrite_traceback_stack(source=source)
+  File "C:\Users\hp\Desktop\survey_app\templates\register.html", line 85, in top-level template code
+    <p>پێشتر هەژمارت هەیە؟ <a href="{{ url_for('login') }}">چوونەژوورەوە</a></p>
+    ^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1121, in url_for
+    return self.handle_url_build_error(error, endpoint, values)
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\flask\app.py", line 1110, in url_for
+    rv = url_adapter.build(  # type: ignore[union-attr]
+        endpoint,
+    ...<3 lines>...
+        force_external=_external,
+    )
+  File "C:\Users\hp\AppData\Local\Programs\Python\Python313\Lib\site-packages\werkzeug\routing\map.py", line 924, in build
+    raise BuildError(endpoint, values, method, self)
+werkzeug.routing.exceptions.BuildError: Could not build url for endpoint 'login'. Did you mean 'register' instead?
+
+2025-08-25 18:21:12,527 INFO 127.0.0.1 - - [25/Aug/2025 18:21:12] "[35m[1mGET /register HTTP/1.1[0m" 500 -
+2025-08-25 18:21:12,537 INFO 127.0.0.1 - - [25/Aug/2025 18:21:12] "[36mGET /register?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-08-25 18:21:12,540 INFO 127.0.0.1 - - [25/Aug/2025 18:21:12] "[36mGET /register?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-08-25 18:21:12,546 INFO 127.0.0.1 - - [25/Aug/2025 18:21:12] "[36mGET /register?__debugger__=yes&cmd=resource&f=console.png&s=iXBtCYpwDDQ2C7zCq36g HTTP/1.1[0m" 304 -
+2025-08-25 18:21:12,579 INFO 127.0.0.1 - - [25/Aug/2025 18:21:12] "[36mGET /register?__debugger__=yes&cmd=resource&f=console.png HTTP/1.1[0m" 304 -
+2025-08-25 18:36:51,262 INFO  * Detected change in 'C:\\Users\\hp\\Desktop\\survey_app\\app.py', reloading
+2025-08-25 18:36:51,296 INFO  * Restarting with stat

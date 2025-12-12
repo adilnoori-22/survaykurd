@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}ڕێکخستنی یاری{% endblock %}
+{% block content %}
+<div class="container" style="max-width:720px">
+  <h1 class="mb-3">ڕێکخستنی کسب پۆینت لە یاری</h1>
+  <form method="post" class="card card-body">
+    <label class="form-label">کۆتایی ڕۆژانە (per user)</label>
+    <input type="number" name="games_daily_quota" class="form-control mb-3" value="{{ data.games_daily_quota }}">
+    <label class="form-label">پۆینتی هەر یاری</label>
+    <input type="number" name="games_points_per_play" class="form-control mb-3" value="{{ data.games_points_per_play }}">
+    <label class="form-label">کەمترین چرکە</label>
+    <input type="number" name="games_min_seconds" class="form-control mb-3" value="{{ data.games_min_seconds }}">
+    <button class="btn btn-primary">پاشەکەوت</button>
+  </form>
+</div>
+{% endblock %}

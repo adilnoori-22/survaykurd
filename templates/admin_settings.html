@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Design — ڕێکخستنەکان (Point ↔️ IQD){% endblock %}
+{% block content %}
+<h2>ڕێکخستنەکانی سیستەم</h2>
+
+
+<form method="post" class="card" style="max-width:720px">
+<div class="grid grid-2">
+<div class="row">
+<label>١ پۆینت = چەند دینار؟ <small class="muted">(money_per_point)</small></label>
+<input type="number" name="money_per_point" value="{{ money_per_point }}" min="1" step="1" required>
+<div class="muted">بۆ هەر پۆینتێک چەند دینار بدە، بۆ نموونە: 10</div>
+</div>
+
+
+<div class="row">
+<label>کەمترین پۆینت بۆ پارەدان <small class="muted">(min_payout_points)</small></label>
+<input type="number" name="min_payout_points" value="{{ min_payout_points }}" min="1" step="1" required>
+</div>
+
+
+<div class="row">
+<label>پاداشتی تەواوکردنی پاکێجی پڕۆفایل <small class="muted">(pts_profile_section)</small></label>
+<input type="number" name="pts_profile_section" value="{{ pts_profile_section|default(20) }}" min="0" step="1">
+</div>
+
+
+<div class="row">
+<label>پاداشتی سەردانی ڕێکلام لە ڕۆژێکدا <small class="muted">(pts_ad_view)</small></label>
+<input type="number" name="pts_ad_view" value="{{ pts_ad_view|default(2) }}" min="0" step="1">
+</div>
+
+
+<div class="row">
+<label>پاداشتی یاری‌کردن لە ڕۆژێکدا <small class="muted">(pts_game_play)</small></label>
+<input type="number" name="pts_game_play" value="{{ pts_game_play|default(2) }}" min="0" step="1">
+</div>
+</div>
+
+
+<div class="row" style="gap:.5rem">
+<button class="btn" type="submit">پاشەکەوت</button>
+<a class="btn secondary" href="{{ url_for('admin_dashboard') }}">گەڕانەوە</a>
+</div>
+</form>
+{% endblock %}

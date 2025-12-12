@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}ڕاپرسیی نوێ{% endblock %}
+{% block content %}
+<h2>ڕاپرسیی نوێ</h2>
+<form method="post" class="card" style="max-width:720px">
+  <div class="row"><label>تايتڵ</label><input name="title" required></div>
+  <div class="row"><label>ڕونکردنەوە</label><textarea name="description" rows="4"></textarea></div>
+  <button class="btn">دروستکردن</button>
+</form>
+{% endblock %}

@@ -1,0 +1,182 @@
+[
+  {
+    "ts": 1758990735,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758990743,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758990874,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758990941,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758992470,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758992478,
+    "game_id": 11,
+    "ad_id": "start:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1758996758,
+    "game_id": 11,
+    "ad_id": "adtest:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "adtest"
+    }
+  },
+  {
+    "ts": 1758996776,
+    "game_id": 11,
+    "ad_id": "adtest:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "adtest"
+    }
+  },
+  {
+    "ts": 1758996816,
+    "game_id": 11,
+    "ad_id": "adtest:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "adtest"
+    }
+  },
+  {
+    "ts": 1758998547,
+    "game_id": 11,
+    "ad_id": "adtest:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "adtest"
+    }
+  },
+  {
+    "ts": 1759005560,
+    "game_id": 11,
+    "ad_id": "adtest:11",
+    "variant": "v",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "adtest"
+    }
+  },
+  {
+    "ts": 1759006243,
+    "game_id": 10,
+    "ad_id": "force_start:10",
+    "variant": "",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "force_start"
+    }
+  },
+  {
+    "ts": 1759006243,
+    "game_id": 10,
+    "ad_id": "start:10",
+    "variant": "",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  },
+  {
+    "ts": 1759007258,
+    "game_id": 10,
+    "ad_id": "force_start:10",
+    "variant": "",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "force_start"
+    }
+  },
+  {
+    "ts": 1759007258,
+    "game_id": 10,
+    "ad_id": "start:10",
+    "variant": "",
+    "room": "",
+    "platform": "desktop",
+    "event": "view",
+    "meta": {
+      "tag": "start"
+    }
+  }
+]

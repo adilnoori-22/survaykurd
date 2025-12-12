@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Profile Options{% endblock %}
+{% block content %}
+<h2>دەستکاری ئۆپشنەکانی پڕۆفایل</h2>
+<p class="muted">هەر خانەیەک بە کۆما ( , ) جیا بکە.</p>
+<form method="post" class="card" style="max-width:900px">
+  <div class="grid grid-2">
+    <div class="row"><label>بڕوانامەکان</label><textarea name="degrees" rows="3">{{ data.degrees }}</textarea></div>
+    <div class="row"><label>شارەکان</label><textarea name="cities" rows="3">{{ data.cities }}</textarea></div>
+    <div class="row"><label>باری خێزانی</label><textarea name="famstat" rows="3">{{ data.famstat }}</textarea></div>
+    <div class="row"><label>جۆری کار</label><textarea name="work_types" rows="3">{{ data.work_types }}</textarea></div>
+    <div class="row"><label>وەزیفەکان</label><textarea name="positions" rows="3">{{ data.positions }}</textarea></div>
+    <div class="row"><label>بواری کار</label><textarea name="sectors" rows="3">{{ data.sectors }}</textarea></div>
+    <div class="row"><label>بواری پیشەیی</label><textarea name="crafts" rows="3">{{ data.crafts }}</textarea></div>
+    <div class="row"><label>جۆری ماڵ</label><textarea name="house_types" rows="3">{{ data.house_types }}</textarea></div>
+    <div class="row"><label>جۆری سەیارە</label><textarea name="car_classes" rows="3">{{ data.car_classes }}</textarea></div>
+    <div class="row"><label>جۆری سوتەمەنی</label><textarea name="fuel_types" rows="3">{{ data.fuel_types }}</textarea></div>
+  </div>
+  <button class="btn" type="submit">پاشەکەوت</button>
+</form>
+{% endblock %}

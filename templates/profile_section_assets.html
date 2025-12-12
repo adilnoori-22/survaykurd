@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}سەرمایە{% endblock %}
+{% block content %}
+<h2>پاکێجی «سەرمایە»</h2>
+<form method="post" class="card">
+  <div class="row"><label>خاوەنی یەکەی نیشتەجێبوونیت؟</label><select name="own_house"><option>بەڵێ</option><option>نەخێر</option></select></div>
+  <div class="row"><label>جۆری ماڵ</label>
+    <select name="house_type">
+      <option>شوقە</option><option>خانوو</option><option>باخ</option><option>ڤێلا</option>
+    </select>
+  </div>
+  <div class="row"><label>ساڵی دروستکردن</label><input name="house_build_year"></div>
+  <div class="row"><label>ماوەی ژیانت لەم ماڵە</label><input name="house_live_years"></div>
+  <div class="row"><label>دڵخۆشی بە گەڕەکەکەت</label><select name="like_neighborhood"><option>بەڵێ</option><option>نەخێر</option></select></div>
+
+  <div class="row"><label>خاوەنی ئۆتۆمبیلیت؟</label><select name="own_car"><option>بەڵێ</option><option>نەخێر</option></select></div>
+  <div class="row"><label>ژمارەی ئۆتۆمبیل لە خێزان</label><input name="cars_in_family"></div>
+  <div class="row"><label>سەیارەکەت بۆ کێ دەگەڕێنیت؟</label><input name="car_owner_for"></div>
+  <div class="row"><label>مۆدێل</label><input name="car_model"></div>
+  <div class="row"><label>جۆر</label>
+    <select name="car_class">
+      <option>سدان</option><option>SUV</option><option>هاچ‌بەک</option><option>پیکاپ</option><option>لۆکسی</option><option>هیتر</option>
+    </select>
+  </div>
+  <div class="row"><label>ماوەی خاوەنی سەیارە بیت</label><input name="car_owned_years"></div>
+  <div class="row"><label>جۆری سوتەمەنی</label>
+    <select name="fuel_type">
+      <option>بەنزین</option><option>گازۆایل</option><option>غاز</option><option>ئەلیکترۆنی</option><option>هایبرید</option><option>هایبرید/ئەلیکترۆنی</option>
+    </select>
+  </div>
+  <div class="row"><label>ئۆتۆمبیلی دڵخواز</label><input name="favorite_car"></div>
+  <div class="row"><label>پلانی گۆڕینەوەی براند هەیە؟</label><input name="plan_change_brand"></div>
+
+  <div class="row"><label>مۆتۆرسکیل هەیە؟</label><select name="own_motorbike"><option>بەڵێ</option><option>نەخێر</option></select></div>
+  <div class="row"><label>جۆری مۆتۆرسکیل</label><input name="motorbike_type"></div>
+
+  <button class="btn">پاشەکەوت</button>
+</form>
+{% endblock %}

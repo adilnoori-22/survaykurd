@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}Design — ڕاپرسیەکان{% endblock %}
+{% block content %}
+<h2>ڕاپرسیەکان</h2>
+
+<div class="row" style="display:flex;justify-content:space-between;align-items:center;gap:.75rem;flex-wrap:wrap">
+  <a class="btn" href="{{ url_for('admin_survey_new') }}">+ ڕاپرسیی نوێ</a>
+  <div class="muted">کردارەکان: پرسیارەکان، دەستکاری، مەرجەکان، ئەنجامەکان، چالاک/وەستاندن، سڕینەوە.</div>
+</div>
+
+<div class="card" style="margin-top:10px">
+  <table class="table">
+    <thead>
+      <tr>
+        <th style="width:60px">ID</th>
+        <th>سەردێر</th>
+        <th style="width:100px">دۆخ</th>
+        <th style="width:120px">خەرجی پۆینت</th>
+        <th style="width:120px">جۆری وەڵام</th>
+        <th style="width:320px">کاراکان</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for s in rows %}
+        <tr>
+          <td>#{{ s['id'] }}</td>
+          <td>{{ s['title'] }}</td>
+          <td>{{ 'چالاک' if s['is_active'] else 'وەستاوە' }}</td>
+          <td>{{ s['reward_points'] }}</td>
+          <td>{{ 'Multiple' if s['allow_multiple'] else 'Single' }}</td>
+          <td>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+              <a class="btn small" href="{{ url_for('admin_survey_questions', survey_id=s['id']) }}">پرسیارەکان</a>
+              <a class="btn small" href="{{ url_for('admin_survey_edit', survey_id=s['id']) }}">دەستکاری</a>
+              <a class="btn small" href="{{ url_for('admin_survey_rules', survey_id=s['id']) }}">مەرجەکان</a>
+              <a class="btn small" href="{{ url_for('admin_survey_results', survey_id=s['id']) }}">ئەنجامەکان</a>
+              <form method="post" action="{{ url_for('admin_survey_toggle', survey_id=s['id']) }}">
+                <button class="btn small secondary" title="{{ 'وەستاندن' if s['is_active'] else 'چالاککردن' }}">{{ 'وەستاندن' if s['is_active'] else 'چالاککردن' }}</button>
+              </form>
+              <form method="post" action="{{ url_for('admin_survey_delete', survey_id=s['id']) }}" onsubmit="return confirm('دڵنیایت لە سڕینەوەی تەواوی ئەم ڕاپرسییە؟');">
+                <button class="btn small danger">سڕینەوە</button>
+              </form>
+            </div>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6">هیچ ڕاپرسییەک نییە.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

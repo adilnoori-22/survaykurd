@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% block title %}جزدان{% endblock %}
+{% block content %}
+
+<style>
+  .wallet-cards{ display:grid; gap:1rem; grid-template-columns: 1fr; }
+  .stats{ display:flex; gap:1rem; flex-wrap:wrap; align-items:center; }
+  .stat{ padding:.75rem 1rem; border:1px solid var(--border); border-radius:14px; }
+  .pill{ display:inline-block; padding:.2rem .55rem; border-radius:999px; background:#334155; color:#e5e7eb; font-size:.85rem; }
+  .form-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:1rem; }
+  .form-grid .row{ margin:0; }
+  .row label{ font-weight:600; margin-bottom:.35rem; display:block; }
+  .muted.small{ font-size:.85rem; opacity:.8; }
+  @media (max-width: 900px){ .form-grid{ grid-template-columns:1fr; } }
+  table.card th, table.card td{ padding:.6rem .7rem; }
+  table.card tr:nth-child(even){ background:rgba(255,255,255,.03); }
+</style>
+
+<h2>جزدان</h2>
+
+<div class="wallet-cards">
+  <div class="card">
+    <div class="stats">
+      <div class="stat">
+        بالانس: <b style="font-size:22px">{{ balance }}</b> پۆینت
+      </div>
+      <div class="stat">
+        1 پۆینت = <b>{{ money_per_point }}</b> IQD
+      </div>
+      <div class="stat">
+        کەمترین پۆینت بۆ پارەدان: <b>{{ min_payout_points }}</b>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 .75rem 0">داواکاری پارەدان</h3>
+    <form method="post" id="payoutForm">
+      <div class="form-grid">
+        <div class="row">
+          <label>رێگای پارەدان</label>
+          <select name="method" id="method" required>
+            <option value="bank_card">کارت بانکی</option>
+            <option value="mobile_topup">یەکەی مۆبایل</option>
+          </select>
+          <div class="muted small">ئەمە دەدیارێت دابینکەری خوارەوە چۆن پیشان بدرێت.</div>
+        </div>
+
+        <div class="row">
+          <label id="providerLabel">دابینکەر</label>
+          <select name="provider" id="provider" required></select>
+          <div class="muted small">کاتێک کارت هەڵتبژێرێت → تەنها بانکەکان؛ کاتێک مۆبایل → تەنها مۆبایلەکان.</div>
+        </div>
+
+        <div class="row">
+          <label id="accountLabel">ژمارە</label>
+          <input name="account" id="account" required inputmode="numeric" placeholder="—">
+          <div class="muted small" id="accountHelp"></div>
+        </div>
+
+        <div class="row">
+          <label>پۆینت</label>
+          <input type="number" name="points" min="{{ min_payout_points }}" max="{{ balance }}" required>
+          <div class="muted small">دەکرێت تا بالانس: {{ balance }}. کەمترین: {{ min_payout_points }}.</div>
+        </div>
+      </div>
+
+      <div style="margin-top:1rem; display:flex; gap:.6rem; flex-wrap:wrap">
+        <button class="btn">ناردنی داواکاری</button>
+        <span class="pill">ئایندە: پارەدان دەستکرد دەکەین</span>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:0 0 .75rem 0">تێچووی جزدان</h3>
+    <div style="overflow:auto">
+      <table class="card" style="width:100%; min-width:720px">
+        <thead>
+          <tr><th>جۆر</th><th>پۆینت</th><th>تێبینی</th><th>کات</th></tr>
+        </thead>
+        <tbody>
+          {% for t in tx %}
+            <tr>
+              <td>{{ t.type }}</td>
+              <td>{{ t.points }}</td>
+              <td>{{ t.note or '' }}</td>
+              <td>{{ t.created_at }}</td>
+            </tr>
+          {% else %}
+            <tr><td colspan="4">هیچ تێچووێک نییە.</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+  // داده‌کان لە بەرەوپێش لەلایەنی سێرڤەرەوە هاتوون
+  const BANKS  = {{ providers_bank  | tojson | safe }};
+  const MOBILS = {{ providers_mobile| tojson | safe }};
+
+  const method   = document.getElementById('method');
+  const provider = document.getElementById('provider');
+  const account  = document.getElementById('account');
+  const accountLabel = document.getElementById('accountLabel');
+  const accountHelp  = document.getElementById('accountHelp');
+  const providerLabel= document.getElementById('providerLabel');
+
+  function fillProviders(list){
+    provider.innerHTML = '';
+    const opt0 = document.createElement('option');
+    opt0.value = ''; opt0.textContent = '— هەڵبژێرە —';
+    provider.appendChild(opt0);
+    list.forEach(p=>{
+      const o = document.createElement('option');
+      o.value = p; o.textContent = p;
+      provider.appendChild(o);
+    });
+  }
+
+  function setAccountForBank(){
+    account.value = '';
+    account.placeholder = 'ژمارەی کارتی بانک / هەژمار';
+    account.pattern = '[0-9\\s-]{8,30}'; // ژمارە، فاسلە یان hyphen
+    account.inputMode = 'numeric';
+    accountLabel.textContent = 'ژمارەی کارتی بانک/هەژمار';
+    accountHelp.textContent = 'تەنها ژمارە بنووسە؛ ڕەچاو: 8–30 ژمارە (دەتوانیت - یان فاسلەش بەکاردەهێنیت).';
+  }
+
+  function setAccountForMobile(){
+    account.value = '';
+    account.placeholder = 'ژمارەی مۆبایل (07XXXXXXXXX)';
+    account.pattern = '0?7[0-9]{9}'; // 07 + 9 ژمارەی دیکە (عێراق)
+    account.inputMode = 'numeric';
+    accountLabel.textContent = 'ژمارەی مۆبایل';
+    accountHelp.textContent = 'بە شێوەی 07XXXXXXXXX داخل بکە. نموونە: 0790xxxxxxx';
+  }
+
+  function refreshUI(){
+    if (method.value === 'bank_card'){
+      providerLabel.textContent = 'بانک';
+      fillProviders(BANKS);
+      setAccountForBank();
+    } else {
+      providerLabel.textContent = 'مۆبایل';
+      fillProviders(MOBILS);
+      setAccountForMobile();
+    }
+  }
+
+  method.addEventListener('change', refreshUI);
+  // سەرەتایی
+  refreshUI();
+})();
+</script>
+{% endblock %}

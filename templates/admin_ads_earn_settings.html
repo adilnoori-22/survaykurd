@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}ڕێکخستنەکانی پۆینت/ریکلام{% endblock %}
+{% block content %}
+{% set eff = ad.points_override if ad.points_override is not none else pts_per %}
+<small class="text-muted d-block">پۆینت: {{ eff }}</small>
+<div class="container" style="max-width:720px">
+  <h1 class="mb-3">ڕێکخستنەکانی کسب پۆینت بە ریکلام</h1>
+
+  <form method="post" class="card card-body">
+    <div class="mb-3">
+      <label class="form-label">کۆتایی ڕۆژانە (چەند ریکلام ڕێگەدراوە لە ڕۆژێک؟)</label>
+      <input type="number" min="0" name="ads_daily_quota" class="form-control"
+             value="{{ data.ads_daily_quota }}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">پۆینتی هەر سەیرکردن</label>
+      <input type="number" min="0" name="ads_points_per_view" class="form-control"
+             value="{{ data.ads_points_per_view }}">
+    </div>
+
+    <div>
+      <button class="btn btn-primary">پاشەکەوت</button>
+      <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary ms-2">گەڕانەوە</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

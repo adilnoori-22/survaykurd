@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}تائیدکردن{% endblock %}
+{% block content %}
+<h2>تائیدکردن</h2>
+<p>تکایە ئیمەیل و ژمارەی واتساپ تائید بکە.</p>
+<ul>
+  <li>ئیمەیل: {{ u['email'] }} — {{ '✅' if u['email_verified'] else '❌' }} <a class="btn" href="{{ url_for('verify_email') }}">تائید</a></li>
+  <li>واتساپ: {{ u['phone_code'] }} {{ u['phone'] }} — {{ '✅' if u['phone_verified'] else '❌' }} <a class="btn" href="{{ url_for('verify_phone') }}">تائید</a></li>
+</ul>
+
+{% if debug_codes %}
+  <div class="flash">
+    <b>DEV DEBUG:</b> کۆدەکان بۆ تاقیکردنەوە — Email: <code>{{ debug_codes.email_code }}</code> | WhatsApp: <code>{{ debug_codes.phone_code }}</code>
+    <br>Expires: {{ debug_codes.expires }}
+  </div>
+{% endif %}
+
+{% if u['email_verified'] and u['phone_verified'] %}
+  <p><a class="btn" href="{{ url_for('login') }}">هەموو تائید کرا — بچۆ بۆ چوونەژوورەوە</a></p>
+{% endif %}
+{% endblock %}

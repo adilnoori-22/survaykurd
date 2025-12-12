@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Box Runner (sample)</title>
+<style>
+  :root{--bg:#0b1220;--panel:#111827;--txt:#e5e7eb;--pri:#22d3ee}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial}
+  .wrap{max-width:920px;margin:0 auto;padding:12px}
+  .hud{display:flex;gap:10px;align-items:center;justify-content:space-between;background:#0e1627;border:1px solid #263247;border-radius:12px;padding:10px 12px}
+  .btn{background:linear-gradient(180deg, rgba(34,211,238,.25), rgba(34,211,238,.08));border:1px solid rgba(255,255,255,.12);
+       color:#dff8ff;font-weight:700;padding:8px 12px;border-radius:10px;cursor:pointer}
+  .btn:hover{transform:translateY(-1px)}
+  canvas{display:block;width:100%;height:520px;background:#0a0f1a;border:1px solid #263247;border-radius:12px;margin-top:10px}
+  .muted{color:#9ca3af}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="hud">
+    <div><b>Box Runner</b> <span class="muted">— کلیک لەسەر چووكەکە بکە!</span></div>
+    <div>Score: <b id="score">0</b></div>
+    <div>Time: <b id="time">30</b>s</div>
+    <button class="btn" id="resetBtn">⟲ دوبارە</button>
+  </div>
+  <canvas id="game" width="920" height="520"></canvas>
+</div>
+
+<script>
+(function(){
+  const cvs = document.getElementById('game');
+  const ctx = cvs.getContext('2d');
+  const scoreEl = document.getElementById('score');
+  const timeEl  = document.getElementById('time');
+  const resetBtn = document.getElementById('resetBtn');
+
+  let box = {x:100,y:100,w:50,h:50,vx:3,vy:2};
+  let score = 0;
+  let timeLeft = 30;
+  let running = true;
+  let last = 0;
+
+  function rand(min,max){return Math.random()*(max-min)+min}
+  function reset(){
+    score = 0; scoreEl.textContent = score;
+    timeLeft = 30; timeEl.textContent = timeLeft;
+    box = {x:rand(20,cvs.width-70), y:rand(20,cvs.height-70), w:50, h:50,
+           vx: rand(2,4)*(Math.random()<.5?-1:1),
+           vy: rand(2,4)*(Math.random()<.5?-1:1)};
+    running = true;
+  }
+  resetBtn.addEventListener('click', reset);
+
+  cvs.addEventListener('click', (e)=>{
+    const rect = cvs.getBoundingClientRect();
+    const mx = (e.clientX - rect.left) * (cvs.width/rect.width);
+    const my = (e.clientY - rect.top)  * (cvs.height/rect.height);
+    if(mx>=box.x && mx<=box.x+box.w && my>=box.y && my<=box.y+box.h){
+      score++; scoreEl.textContent = score;
+      // speed up a bit and jump
+      box.vx *= 1.05; box.vy *= 1.05;
+      box.x = rand(10, cvs.width-60); box.y = rand(10, cvs.height-60);
+    }
+  });
+
+  function step(ts){
+    const dt = (ts - last)/1000 || 0; last = ts;
+    if(running){
+      timeLeft -= dt;
+      if(timeLeft <= 0){ timeLeft = 0; running = false; }
+      timeEl.textContent = timeLeft.toFixed(0);
+      // move
+      box.x += box.vx; box.y += box.vy;
+      if(box.x<0 || box.x+box.w>cvs.width){ box.vx*=-1; box.x = Math.max(0, Math.min(cvs.width-box.w, box.x)); }
+      if(box.y<0 || box.y+box.h>cvs.height){ box.vy*=-1; box.y = Math.max(0, Math.min(cvs.height-box.h, box.y)); }
+    }
+    // draw
+    ctx.clearRect(0,0,cvs.width,cvs.height);
+    // target
+    ctx.fillStyle = '#22d3ee';
+    ctx.shadowColor = '#22d3ee'; ctx.shadowBlur = 18;
+    ctx.fillRect(box.x, box.y, box.w, box.h);
+    ctx.shadowBlur = 0;
+    // finish
+    if(!running){
+      ctx.fillStyle = 'rgba(0,0,0,.5)';
+      ctx.fillRect(0,0,cvs.width,cvs.height);
+      ctx.fillStyle = '#e5e7eb';
+      ctx.font = '700 28px system-ui';
+      ctx.textAlign='center';
+      ctx.fillText('Kurd Box Runner — تۆمار: '+score, cvs.width/2, cvs.height/2);
+      ctx.font = '400 16px system-ui';
+      ctx.fillText('کلیل لە ⟲ دوبارە بکە بۆ دەستپێکردنەوە', cvs.width/2, cvs.height/2+28);
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+})();
+</script>
+</body>
+</html>

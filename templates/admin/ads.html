@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Ads{% endblock %}
+{% block content %}
+<h2>ڕیکلامەکان</h2>
+<form class="card" method="post">
+  <input type="hidden" name="token" value="{{ token }}">
+  <div class="row">
+    <label style="flex:1">ناونیشان<br><input name="title"></label>
+    <label style="flex:1">Image URL<br><input name="image_url" placeholder="https://..."></label>
+    <label style="flex:1">Click URL<br><input name="click_url" placeholder="https://..."></label>
+    <label><input type="checkbox" name="is_active" value="1" checked> چالاک</label>
+  </div>
+  <div style="margin-top:10px">
+    <button class="btn">زیادکردن</button>
+  </div>
+</form>
+
+<div class="grid" style="margin-top:20px">
+  {% for a in ads %}
+  <div class="card">
+    <div style="display:flex; gap:10px; align-items:center">
+      <img src="{{ a['image_url'] or '' }}" style="width:64px;height:64px;object-fit:cover;border-radius:8px" onerror="this.style.display='none'">
+      <div>
+        <div style="font-weight:600">{{ a['title'] }}</div>
+        <a href="{{ a['click_url'] or '#' }}" class="muted" target="_blank">{{ a['click_url'] }}</a>
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div class="muted">هیچ ڕیکلامێک نییە.</div>
+  {% endfor %}
+</div>
+{% endblock %}

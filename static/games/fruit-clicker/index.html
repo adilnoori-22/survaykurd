@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fruit Clicker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>🍎 Fruit Clicker</h1>
+      <div class="stats">
+        <div>Score: <span id="score">0</span></div>
+        <div>Time: <span id="time">30</span>s</div>
+        <div>Best: <span id="best">0</span></div>
+      </div>
+    </header>
+
+    <main id="board" class="board"></main>
+
+    <footer class="controls">
+      <button id="start">Start</button>
+      <button id="reset">Reset</button>
+    </footer>
+  </div>
+
+  <script>
+    // Optional ad hook integration (if your app defines showInterstitial / onLevelComplete)
+    function maybeShowAd() {
+      if (typeof showInterstitial === 'function') {
+        try { showInterstitial({id: 'fruit-clicker'}); } catch(e) {}
+      }
+      if (typeof onLevelComplete === 'function') {
+        try { onLevelComplete({level:1, score: window.__score || 0}); } catch(e) {}
+      }
+    }
+  </script>
+  <script src="game.js"></script>
+</body>
+</html>

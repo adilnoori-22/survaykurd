@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}پلەی یاری – {{ game.title }}
+<script>window.AD_GAME_ID = {{ game.id|int }}; /* هەروەها room لە کوێری؟room=... */</script>
+<script src="/static/js/ads.js"></script>      <!-- showInterstitial / creditAd -->
+<script src="/static/js/ad_hooks.js"></script> <!-- ئەمەی نوێ -->
+<script>window.AD_IS_CLICK_GAME = true;</script>
+
+<script>
+  // Force a pre-roll at game start and block the UI until the ad is closed
+  window.AD_FORCE_PREROLL = true;
+  (function(){
+    var gate = document.createElement('div');
+    gate.id = 'ad-gate-overlay';
+    gate.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.2rem;text-align:center';
+    gate.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(255,255,255,.15);padding:16px 22px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.35)"><div>🎬 ڕیکلامی سەرەتای یاری…</div><div class="muted" style="font-size:.92rem;margin-top:6px;opacity:.85">تکایە چاوەڕێ بکە تا کۆتایی ڕیکلام</div></div>';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(gate); });
+    window.onInterstitialClosed = function(){ try{gate.remove();}catch(e){} };
+  })();
+</script>
+
+<script src="/static/js/stake_ui.js"></script>
+{% endblock %}
+{% block content %}
+<h2 style="display:flex;align-items:center;justify-content:space-between;gap:.6rem">
+  <span>{{ game.title }}</span>
+  <span style="display:inline-flex;gap:.4rem">
+    {% if play_url %}
+      <a class="btn small" target="_blank" rel="noopener" href="{{ play_url }}">گۆڕین بۆ 탭ێکی نوێ</a>
+      <button id="btn-fullscreen" class="btn small" type="button" title="فول سکرین">⛶ فول سکرین</button>
+    {% endif %}
+    <a class="btn small" href="{{ request.referrer or url_for('games_play', game_id=game.id) }}">گەڕانەوە</a>
+  </span>
+</h2>
+
+{% if room %}
+  <div class="muted" style="margin-bottom:8px">کۆدی ژوور: <strong>{{ room }}</strong></div>
+{% endif %}
+
+{% if play_url %}
+  <div id="game-wrap" style="position:relative;border-radius:14px;overflow:hidden;background:#000">
+    <iframe id="game-frame"
+            src="{{ play_url }}"
+            width="100%" height="600"
+            allow="fullscreen; autoplay; gamepad;"
+            allowfullscreen
+            style="border:0; display:block;"></iframe>
+    <div id="embed-note" class="muted" style="display:none;position:absolute;inset:auto 0 0 0;padding:8px;background:rgba(0,0,0,.5);text-align:center">
+      ئەگەر یاریەکە نیشان نەدرا، لەسەر «گۆڕین بۆ 탭ێکی نوێ» کلیک بکە—ڕوونکراوەکانێک لە ماڵپەڕی یارییەکە ڕێگای embed نابەخشێت.
+    </div>
+  </div>
+{% else %}
+  <div class="card">هیچ Play URL ـێک دیارینەکراوە بۆ ئەم یارییە. تکایە لە لاپەڕەی ئەدمین پێدانی بکە.</div>
+{% endif %}
+
+<script>
+(function(){
+  var btn = document.getElementById('btn-fullscreen');
+  var frame = document.getElementById('game-frame');
+  var wrap  = document.getElementById('game-wrap');
+  var note  = document.getElementById('embed-note');
+
+  if (!frame || !wrap) return;
+
+  function requestFs(el){
+    if (el.requestFullscreen) return el.requestFullscreen();
+    if (el.webkitRequestFullscreen) return el.webkitRequestFullscreen();
+    if (el.mozRequestFullScreen) return el.mozRequestFullScreen();
+    if (el.msRequestFullscreen) return el.msRequestFullscreen();
+  }
+  function exitFs(){
+    if (document.exitFullscreen) return document.exitFullscreen();
+    if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+    if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
+    if (document.msExitFullscreen) return document.msExitFullscreen();
+  }
+  function isFs(){
+    return document.fullscreenElement || document.webkitFullscreenElement ||
+           document.mozFullScreenElement || document.msFullscreenElement;
+  }
+  function syncFs(){
+    if (isFs()){
+      if (btn) btn.textContent = '✕ دەرچوون لە فول سکرین';
+      frame.style.height = (window.innerHeight || screen.height || 600) + 'px';
+    } else {
+      if (btn) btn.textContent = '⛶ فول سکرین';
+      frame.style.height = '600px';
+    }
+  }
+  if (btn){
+    btn.addEventListener('click', function(){
+      if (!isFs()){ requestFs(wrap); } else { exitFs(); }
+    });
+  }
+  document.addEventListener('fullscreenchange', syncFs);
+  document.addEventListener('webkitfullscreenchange', syncFs);
+  document.addEventListener('mozfullscreenchange', syncFs);
+  document.addEventListener('MSFullscreenChange', syncFs);
+
+  try {
+    var pinged = false;
+    var t = setTimeout(function(){
+      if (!pinged){ note && (note.style.display='block'); }
+    }, 1500);
+    window.addEventListener('message', function(){ pinged = true; clearTimeout(t); }, {once:true});
+    frame.contentWindow && frame.contentWindow.postMessage({ping:'embed-check'}, '*');
+  } catch(e){}
+
+  document.addEventListener('keydown', function(e){
+    if (e.key && e.key.toLowerCase() === 'f'){ e.preventDefault(); if (!isFs()) requestFs(wrap); else exitFs(); }
+  });
+})();
+</script>
+
+<script>window.AD_GAME_ID = {{ game.id|int }};</script>
+<script src="/static/js/ads.js"></script>
+<script src="/static/js/ad_hooks.js"></script>
+
+
+<script>
+  // Force a pre-roll at game start and block the UI until the ad is closed
+  window.AD_FORCE_PREROLL = true;
+  (function(){
+    var gate = document.createElement('div');
+    gate.id = 'ad-gate-overlay';
+    gate.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.2rem;text-align:center';
+    gate.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(255,255,255,.15);padding:16px 22px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.35)"><div>🎬 ڕیکلامی سەرەتای یاری…</div><div class="muted" style="font-size:.92rem;margin-top:6px;opacity:.85">تکایە چاوەڕێ بکە تا کۆتایی ڕیکلام</div></div>';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(gate); });
+    window.onInterstitialClosed = function(){ try{gate.remove();}catch(e){} };
+  })();
+</script>
+
+<script src="/static/js/stake_ui.js"></script>
+{% endblock %}

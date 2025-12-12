@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Earn Settings{% endblock %}
+{% block content %}
+<h2>ڕێکخستنەکانی قازانج</h2>
+<form class="card" method="post">
+  <input type="hidden" name="token" value="{{ token }}">
+  <div class="row">
+    <label style="flex:1">پۆینت لە یەک خولەکدا<br><input name="points_per_minute" type="number" min="0" value="{{ points_per_minute }}"></label>
+    <label style="flex:1">کەمترین چرکە بۆ پۆینت<br><input name="min_seconds_to_reward" type="number" min="0" value="{{ min_seconds_to_reward }}"></label>
+  </div>
+  <div style="margin-top:10px">
+    <button class="btn">پاشەکەوت</button>
+  </div>
+  {% if message %}<div class="flash" style="margin-top:10px">{{ message }}</div>{% endif %}
+</form>
+{% endblock %}

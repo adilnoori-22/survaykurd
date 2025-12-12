@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+{% block title %}Admin — پەیجەکان (Pro WYSIWYG, بێ API){% endblock %}
+{% block content %}
+<style>
+  :root{
+    --glass: rgba(255,255,255,.04);
+    --glass-2: rgba(255,255,255,.06);
+  }
+  .layout{display:grid;grid-template-columns: 420px 1fr;gap:16px}
+  @media (max-width: 1200px){ .layout{grid-template-columns:1fr} }
+  .card+.card{margin-top:0}
+  .toolbar-sticky{position:sticky; top:12px; z-index:5}
+  .list-head{display:flex;align-items:center;justify-content:space-between;margin:0 0 8px}
+  .list{max-height:68vh;overflow:auto;border-radius:14px;border:1px solid var(--border);background:var(--glass)}
+  .list table{width:100%}
+  .list .actions{display:flex;gap:.35rem;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:.35rem;background:var(--glass-2);border:1px solid var(--border);padding:.22rem .5rem;border-radius:999px;font-size:.82rem}
+  .green{color:#34d399}.red{color:#f87171}.muted2{opacity:.8}
+  .kbd{font-family:ui-monospace,monospace;border:1px solid var(--border);border-radius:6px;padding:1px 6px;background:var(--glass);font-size:.82rem}
+  .editor-card{padding:0;border-radius:16px;border:1px solid var(--border);background:var(--glass)}
+  .editor-head{display:flex;align-items:center;gap:.5rem;justify-content:space-between;padding:10px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:linear-gradient(0deg, var(--glass), var(--glass)), transparent;backdrop-filter: blur(6px)}
+  .editor-head .row{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+  .editor-body{padding:12px}
+  .note-editor.note-frame{border-radius:12px;overflow:hidden;border:1px solid var(--border);background:rgba(255,255,255,.03)}
+  .note-toolbar{direction:ltr}
+  .note-editable{direction:rtl;text-align:right;min-height:420px}
+  .toolbtn{font-size:.9rem;padding:.35rem .6rem;border-radius:10px;border:1px solid var(--border);background:var(--glass-2)}
+  .toolbtn.secondary{background:transparent}
+  .toolbtn.danger{background:#ef4444;border-color:#ef4444}
+  .chip{border:1px dashed var(--border);padding:.25rem .45rem;border-radius:8px;font-size:.8rem}
+  .preview{margin-top:12px;border:1px dashed var(--border);border-radius:12px;padding:10px;background:rgba(255,255,255,.02);display:none}
+  .preview.active{display:block}
+  .preview h1,.preview h2,.preview h3{margin:.6em 0 .3em}
+  .status-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#16a34a}
+  .status-dot.unsaved{background:#f59e0b}
+  .emoji-panel{ display:none; position:absolute; z-index:9999; background:#121826; border:1px solid var(--border); border-radius:10px; padding:6px; width:300px; max-height:220px; overflow:auto; box-shadow:var(--shadow) }
+  .emoji-panel button{ background:transparent; border:0; font-size:22px; padding:6px; cursor:pointer }
+</style>
+
+<h2 style="display:flex;align-items:center;gap:.6rem">
+  پەیجەکان
+  <span class="chip">Ctrl + S → پاشەکەوت</span>
+  <span class="chip">Ctrl + / → پیشاندان</span>
+</h2>
+
+<div class="layout">
+  <!-- Left column: list & meta -->
+  <div class="toolbar-sticky">
+    <div class="card" style="margin-bottom:12px">
+      <h3 style="margin:0 0 6px">زانیاری پەیج</h3>
+      <div class="grid grid-2">
+        <div class="row"><label>Slug</label><input form="pageForm" name="slug" value="{{ edit.slug if edit else '' }}" required placeholder="research / stats / archive"></div>
+        <div class="row"><label>Path</label><input form="pageForm" name="path" value="{{ edit.path if edit else '' }}" placeholder="/research"></div>
+      </div>
+      <div class="row"><label>ناونیشان</label><input form="pageForm" name="title" value="{{ edit.title if edit else '' }}" required></div>
+      <div class="row" style="display:flex;align-items:center;gap:.6rem">
+        <label style="margin:0">چالاک؟</label><input form="pageForm" type="checkbox" name="is_active" {% if edit and edit.is_active %}checked{% elif not edit %}checked{% endif %}>
+        <label style="margin:0 0 0 12px">قالب</label>
+        <select form="pageForm" name="template"><option value="page" {% if not edit or edit.template=='page' %}selected{% endif %}>page</option></select>
+        <span class="pill"><span id="saveDot" class="status-dot"></span> <span id="saveTxt">Saved</span></span>
+      </div>
+      <div class="row" style="display:flex;gap:.5rem;flex-wrap:wrap">
+        <a class="btn small" target="_blank" href="{{ url_for('page_view', slug=(edit.slug if edit else 'preview')) }}">پەیجی گشتی</a>
+        <button class="btn small secondary" type="button" id="btnExport">Export HTML</button>
+        <label class="btn small secondary" for="fileImport" style="cursor:pointer">Import HTML</label>
+        <input id="fileImport" type="file" accept=".html,.htm,.txt" style="display:none">
+      </div>
+    </div>
+
+    <div class="card list">
+      <div class="list-head">
+        <h3 style="margin:0">لیستی پەیجەکان</h3>
+        <a class="btn small" href="{{ url_for('admin_pages') }}">+ نوێ</a>
+      </div>
+      <table class="table">
+        <thead><tr><th>#</th><th>Slug</th><th>ناونیشان</th><th>دۆخ</th><th>نوێکرایەوە</th><th>کاراکان</th></tr></thead>
+        <tbody>
+        {% for p in pages %}
+          <tr>
+            <td>{{ p.id }}</td>
+            <td><a href="{{ url_for('page_view', slug=p.slug) }}" target="_blank">{{ p.slug }}</a></td>
+            <td>{{ p.title }}</td>
+            <td>{{ 'چالاک' if p.is_active else 'وەستاوە' }}</td>
+            <td class="muted2">{{ p.updated_at }}</td>
+            <td class="actions">
+              <a class="btn small" href="{{ url_for('admin_pages', edit=p.slug) }}">دەستکاری</a>
+              <form method="post" action="{{ url_for('admin_pages') }}" onsubmit="return confirm('دڵنیایت؟');">
+                <input type="hidden" name="action" value="toggle">
+                <input type="hidden" name="id" value="{{ p.id }}">
+                <button class="btn small">{{ 'وەستاندن' if p.is_active else 'چالاککردن' }}</button>
+              </form>
+              <form method="post" action="{{ url_for('admin_pages') }}" onsubmit="return confirm('سڕدرێت؟');">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="id" value="{{ p.id }}">
+                <button class="btn small danger">سڕینەوە</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="6">هیچ پەیجێک نییە.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Right column: editor -->
+  <form id="pageForm" class="editor-card" method="post" action="{{ url_for('admin_pages') }}">
+    <input type="hidden" name="action" value="{{ 'update' if edit else 'create' }}">
+    {% if edit %}<input type="hidden" name="id" value="{{ edit.id }}">{% endif %}
+
+    <div class="editor-head">
+      <div class="row">
+        <button class="toolbtn" type="submit" title="پاشەکەوت (Ctrl+S)">پاشەکەوت</button>
+        <button class="toolbtn secondary" type="button" id="btnPreview" title="پیشاندان (Ctrl+/)">پیشاندان</button>
+        <div class="muted small">/ قالبەکان: </div>
+        <select id="tplSelect" class="toolbtn secondary">
+          <option value="">Insert template…</option>
+          <option value="hero">Hero</option>
+          <option value="twocols">Two Columns</option>
+          <option value="faq">FAQ (details)</option>
+          <option value="stats">Stats Grid</option>
+          <option value="cta">Call to Action</option>
+          <option value="table">Table (3×3)</option>
+        </select>
+        <button class="toolbtn secondary" type="button" id="btnEmoji">Emoji 😀</button>
+        <button class="toolbtn secondary" type="button" id="btnRTL">RTL</button>
+        <button class="toolbtn secondary" type="button" id="btnLTR">LTR</button>
+        <span class="muted small">| AutoSave: <span id="autoTxt">on</span></span>
+      </div>
+      <div class="row">
+        <span class="muted small">Shortcut: <span class="kbd">Ctrl+S</span> / <span class="kbd">Ctrl+/</span></span>
+      </div>
+    </div>
+
+    <div class="editor-body">
+      <textarea name="content" id="editor">{{ edit.content if edit else '<h2 style="text-align:center">سڵاو 👋</h2><p>وێنە/خشتە/ڕەنگ/فۆنت لێرە دابنێ.</p>' }}</textarea>
+
+      <div id="preview" class="preview">
+        <div class="tinymce-content" id="previewInner"></div>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- Emoji panel -->
+<div class="emoji-panel" id="emojiPanel"></div>
+{% endblock %}
+
+{% block scripts %}
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+<script>
+  // ===== Editor init =====
+  $('#editor').summernote({
+    height: 520,
+    placeholder: 'ناوەڕۆک بنووسە...',
+    dialogsInBody: true,
+    disableDragAndDrop: false,
+    toolbar: [
+      ['style',   ['style']],
+      ['font',    ['bold','italic','underline','strikethrough','clear','superscript','subscript']],
+      ['font2',   ['fontname','fontsize','fontsizeunit']],
+      ['color',   ['color']],
+      ['para',    ['ul','ol','paragraph']],
+      ['table',   ['table']],
+      ['insert',  ['picture','link','video','hr']],
+      ['height',  ['height']],
+      ['edit',    ['undo','redo']],
+      ['view',    ['codeview','fullscreen','help']]
+    ],
+    fontNames: ['system-ui','Segoe UI','Tahoma','Arial','Roboto','Noto Sans','Times New Roman','Courier New'],
+    fontSizes: ['10','11','12','14','16','18','20','22','24','28','32','36'],
+    styleTags: ['p','h1','h2','h3','h4','h5','h6','blockquote','pre'],
+    lineHeights: ['1.2','1.4','1.6','1.8','2.0'],
+    callbacks: {
+      onInit: function(){
+        $('.note-editable').attr('dir','rtl').css({textAlign:'right', lineHeight:'1.85'});
+        markSaved(true);
+        restoreDraft();
+      },
+      onChange: function(){ markSaved(false); livePreview(); autoSave(); },
+      onPaste: function(e){
+        if(window.pastePlain){
+          e.preventDefault();
+          var text = (e.originalEvent || e).clipboardData.getData('text/plain');
+          document.execCommand('insertText', false, text);
+        }
+      },
+      onImageUpload: function(files){
+        for (let i=0;i<files.length;i++){
+          const reader = new FileReader();
+          reader.onload = e => $('#editor').summernote('insertImage', e.target.result, files[i].name);
+          reader.readAsDataURL(files[i]);
+        }
+      }
+    },
+    popover: {
+      image: [
+        ['image', ['resizeFull','resizeHalf','resizeQuarter','resizeNone']],
+        ['float', ['floatLeft','floatRight','floatNone']],
+        ['remove', ['removeMedia']]
+      ],
+      link: [
+        ['link', ['linkDialogShow','unlink']]
+      ],
+      table: [
+        ['add', ['addRowDown','addRowUp','addColLeft','addColRight']],
+        ['delete', ['deleteRow','deleteCol','deleteTable']]
+      ]
+    }
+  });
+
+  // ===== Autosave (localStorage) =====
+  const slugInput = document.querySelector('input[name="slug"]');
+  function storageKey(){ return 'cms:' + (slugInput.value || 'draft'); }
+  function autoSave(){
+    try{
+      localStorage.setItem(storageKey(), $('#editor').summernote('code'));
+      document.getElementById('autoTxt').innerText='on';
+    }catch(e){ document.getElementById('autoTxt').innerText='off'; }
+  }
+  function restoreDraft(){
+    try{
+      const val = localStorage.getItem(storageKey());
+      if(val){ $('#editor').summernote('code', val); }
+    }catch(e){}
+  }
+  window.addEventListener('beforeunload', function (e) {
+    if(!window._isSaved){
+      e.preventDefault(); e.returnValue = '';
+    }
+  });
+
+  // ===== Status & preview =====
+  function markSaved(ok){
+    window._isSaved = !!ok;
+    document.getElementById('saveDot').classList.toggle('unsaved', !ok);
+    document.getElementById('saveTxt').innerText = ok ? 'Saved' : 'Unsaved';
+  }
+  function livePreview(){
+    const dirty = $('#editor').summernote('code');
+    const clean = DOMPurify.sanitize(dirty, { USE_PROFILES: { html: true } });
+    document.getElementById('previewInner').innerHTML = clean;
+  }
+  function togglePreview(){
+    const box = document.getElementById('preview');
+    box.classList.toggle('active');
+    livePreview();
+  }
+
+  // ===== Templates quick insert =====
+  const TPL = {
+    hero: `<section style="text-align:center;padding:28px 10px">
+      <h1 style="font-size:38px;margin:.2em 0">سەردێری سەرەکی پەیج</h1>
+      <p class="muted" style="font-size:18px">دەقی پوختەی لێرە بنووسە...</p>
+      <p><a href="#" class="btn">کرتەی سەرەکی</a></p></section>`,
+    twocols: `<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:10px 0">
+      <div class="card"><h3>پەنجەی یەکەم</h3><p>دەق...</p></div>
+      <div class="card"><h3>پەنجەی دووەم</h3><p>دەق...</p></div></div>`,
+    faq: `<section style="margin:8px 0">
+      <h3>پرسیارە باوەکان</h3>
+      <details class="card"><summary><b>پرسیار ١</b></summary><div><p>وەڵام...</p></div></details>
+      <details class="card"><summary><b>پرسیار ٢</b></summary><div><p>وەڵام...</p></div></details></section>`,
+    stats: `<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+      <div class="card" style="text-align:center"><div style="font-size:26px">12k</div><div class="muted">Users</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:26px">98%</div><div class="muted">Satisfaction</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:26px">24/7</div><div class="muted">Support</div></div>
+      <div class="card" style="text-align:center"><div style="font-size:26px">1.2s</div><div class="muted">TTFB</div></div></div>`,
+    cta: `<section class="card" style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+      <div><h3 style="margin:.2em 0">ئامادەیت بۆ دەستپێکردن؟</h3><p class="muted">تێکەڵ ببە لەگەڵ ئێمە...</p></div>
+      <a href="#" class="btn">دەستپێکردن</a></section>`,
+    table: `<table class="table"><thead><tr><th>سەرلەنووسە ١</th><th>٢</th><th>٣</th></tr></thead><tbody>
+      <tr><td>خانة</td><td>خانة</td><td>خانة</td></tr>
+      <tr><td>خانة</td><td>خانة</td><td>خانة</td></tr></tbody></table>`
+  };
+  document.getElementById('tplSelect').addEventListener('change', function(){
+    const k = this.value; if(!k) return;
+    $('#editor').summernote('pasteHTML', TPL[k]); this.value='';
+  });
+
+  // ===== Top bar buttons =====
+  document.getElementById('btnPreview').onclick = togglePreview;
+  document.getElementById('btnExport').onclick = function(){
+    const blob = new Blob([$('#editor').summernote('code')], {type:'text/html;charset=utf-8'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = (slugInput.value||'page') + '.html'; a.click();
+  };
+  document.getElementById('fileImport').addEventListener('change', function(){
+    const f = this.files[0]; if(!f) return;
+    const r = new FileReader(); r.onload = e => $('#editor').summernote('code', e.target.result); r.readAsText(f);
+  });
+  document.getElementById('btnEmoji').onclick = function(ev){
+    const panel = document.getElementById('emojiPanel');
+    if(panel.style.display==='block'){ panel.style.display='none'; return; }
+    const EMOJIS = "😀😁😂🤣😃😄😅😆😉😊🙂🥰😍🤩😘😗😙😚😋😜🤪😝🫠🤗🤭🤫🤔🤤😴🤓🧐😎🥳😤😮‍💨😱😨😰😥😪😵‍💫😵🤯🤠😇🤥😶‍🌫️😐😑😶🙄😬😭😢😟😕☹️🙁😮😯😲😳🤒🤕🤧🤮🤢🤨😖😣😞😔😩😫🥱😤😡😠💀👻👽🤖👍👎👌✌️🤞🤟🤘👏🙌🙏💪💖💘💝💗💓💞💥✨🔥🌟🎉🎊⭐".split('');
+    panel.innerHTML=''; EMOJIS.forEach(e=>{const b=document.createElement('button');b.type='button';b.textContent=e;b.onclick=()=>{$('#editor').summernote('pasteHTML', e); panel.style.display='none'}; panel.appendChild(b);});
+    panel.style.display='block'; const r=ev.target.getBoundingClientRect(); panel.style.right=(window.innerWidth-r.right)+'px'; panel.style.top=(window.scrollY+r.bottom+6)+'px';
+  };
+  document.getElementById('btnRTL').onclick = ()=>{ $('.note-editable').attr('dir','rtl').css('text-align','right'); };
+  document.getElementById('btnLTR').onclick = ()=>{ $('.note-editable').attr('dir','ltr').css('text-align','left'); };
+
+  // ===== Keyboard shortcuts =====
+  window.addEventListener('keydown', function(e){
+    if((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==='s'){ e.preventDefault(); document.getElementById('pageForm').requestSubmit(); }
+    if((e.ctrlKey||e.metaKey) && e.key==='/'){ e.preventDefault(); togglePreview(); }
+  });
+
+  // Mark saved on submit
+  document.getElementById('pageForm').addEventListener('submit', function(){ markSaved(true); localStorage.removeItem(storageKey()); });
+
+  // Paste plain toggle (you can add a checkbox with id="pastePlain" if you want)
+  window.pastePlain = false;
+</script>
+{% endblock %}

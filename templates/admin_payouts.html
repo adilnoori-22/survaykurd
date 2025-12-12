@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+{% block title %}Design — Payouts{% endblock %}
+{% block content %}
+<h2>پەرەدان (Payouts)</h2>
+
+{# ===== Filters (optional) ===== #}
+<form method="get" class="card" style="max-width:980px; margin-bottom:12px">
+  <div class="grid grid-4">
+    <div class="row">
+      <label>Status</label>
+      <select name="status">
+        <option value="">— Any —</option>
+        {% for s in ['pending','approved','paid','rejected'] %}
+          <option value="{{s}}" {% if payout_summary and payout_summary.filters.status == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="row">
+      <label>Source</label>
+      <input type="text" name="source" value="{{ payout_summary.filters.source if payout_summary else '' }}" placeholder="e.g. Admin Wallet">
+    </div>
+    <div class="row">
+      <label>From</label>
+      <input type="date" name="from" value="{{ payout_summary.filters.date_from if payout_summary else '' }}">
+    </div>
+    <div class="row">
+      <label>To</label>
+      <input type="date" name="to" value="{{ payout_summary.filters.date_to if payout_summary else '' }}">
+    </div>
+  </div>
+  <div class="row" style="margin-top:8px; display:flex; gap:.5rem">
+    <button class="btn">Filter</button>
+    <a class="btn secondary" href="{{ url_for('admin_payouts') }}">Reset</a>
+  </div>
+</form>
+
+{# ===== Summary card (optional) ===== #}
+{% if payout_summary %}
+<div class="card" style="max-width:980px; margin-bottom:12px">
+  <h3 style="margin-top:0">کورتەی ڕاپۆرت</h3>
+  <div class="grid grid-3">
+    <div class="row">
+      <div><strong>Pending</strong></div>
+      <div>{{ payout_summary.pending.n }} req</div>
+      <div>{{ payout_summary.pending.pts }} pts</div>
+      <div>{{ payout_summary.pending.money }} IQD</div>
+    </div>
+    <div class="row">
+      <div><strong>Paid</strong></div>
+      <div>{{ payout_summary.paid.n }} req</div>
+      <div>{{ payout_summary.paid.pts }} pts</div>
+      <div>{{ payout_summary.paid.money }} IQD</div>
+    </div>
+    <div class="row">
+      <div class="muted"><strong>Recent</strong></div>
+      <div>7d: {{ payout_summary.paid_7d.n }} · {{ payout_summary.paid_7d.pts }} pts · {{ payout_summary.paid_7d.money }} IQD</div>
+      <div>30d: {{ payout_summary.paid_30d.n }} · {{ payout_summary.paid_30d.pts }} pts · {{ payout_summary.paid_30d.money }} IQD</div>
+    </div>
+  </div>
+  {% if payout_summary.by_source and payout_summary.by_source|length %}
+  <hr>
+  <div><strong>By source</strong></div>
+  <table class="table">
+    <thead><tr><th>Source</th><th>#</th><th>Pts</th><th>IQD</th></tr></thead>
+    <tbody>
+      {% for s in payout_summary.by_source %}
+      <tr><td>{{ s.source }}</td><td>{{ s.n }}</td><td>{{ s.pts }}</td><td>{{ s.money }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="grid grid-2">
+  <!-- Settings -->
+  <form method="post" class="card">
+    <h3 style="margin-top:0">ڕێکخستنەکان</h3>
+    <input type="hidden" name="action" value="save_settings">
+    <div class="grid grid-3">
+      <div class="row">
+        <label>IQD بۆ 1 پۆینت</label>
+        <input type="number" name="money_per_point" value="{{ money_per_point or 10 }}" min="1" required>
+      </div>
+      <div class="row">
+        <label>کەمترین پۆینت بۆ پارەدان</label>
+        <input type="number" name="min_payout_points" value="{{ min_payout_points or 100 }}" min="1" required>
+      </div>
+      <div class="row">
+        <label>کەمکردنەوەی پۆینت (فی) بۆ هەر پارەدان</label>
+        <input type="number" name="payout_fee_points" value="{{ payout_fee_points or 5 }}" min="0" required>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn">پاشەکەوت</button>
+    </div>
+  </form>
+
+  <!-- Add Provider -->
+  <form method="post" class="card">
+    <h3 style="margin-top:0">+ سەرچاوەی نوێ</h3>
+    <input type="hidden" name="action" value="provider_add">
+    <div class="grid grid-3">
+      <div class="row">
+        <label>ناو</label>
+        <input type="text" name="name" required placeholder="نموونە: Ashur Bank یان Zain">
+      </div>
+      <div class="row">
+        <label>جۆر</label>
+        <select name="kind" required>
+          <option value="bank">بانک</option>
+          <option value="mobile">مۆبایل</option>
+        </select>
+      </div>
+      <div class="row">
+        <label>خانەکان (JSON اختیاری)</label>
+        <input type="text" name="fields_json" placeholder='{"account":"ژمارەی هەژمار"}'>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="btn">زیادکردن</button>
+    </div>
+  </form>
+</div>
+
+<!-- Providers table -->
+<div class="card" style="margin-top:12px">
+  <h3 style="margin-top:0">سەرچاوەکان</h3>
+  <table class="table">
+    <thead><tr><th style="width:70px">ID</th><th>ناو</th><th>جۆر</th><th>دۆخ</th><th style="width:220px">کردار</th></tr></thead>
+    <tbody>
+      {% for p in providers %}
+        <tr>
+          <td>#{{ p.id }}</td>
+          <td>{{ p.name }}</td>
+          <td>{{ 'بانک' if p.kind=='bank' else 'مۆبایل' }}</td>
+          <td>{{ 'چالاک' if p.is_active else 'وەستاوە' }}</td>
+          <td>
+            <div style="display:flex;gap:.4rem;flex-wrap:wrap">
+              <form method="post" action="{{ url_for('admin_payout_provider_toggle', pid=p.id) }}"><button class="btn small secondary">{{ 'وەستاندن' if p.is_active else 'چالاککردن' }}</button></form>
+              <form method="post" action="{{ url_for('admin_payout_provider_delete', pid=p.id) }}" onsubmit="return confirm('سڕینەوە دڵنیایت؟');"><button class="btn small danger">سڕینەوە</button></form>
+            </div>
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5">هیچ سەرچاوەیەک نییە.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<!-- Payouts table -->
+<div class="card" style="margin-top:12px">
+  <h3 style="margin-top:0">داواکاریەکانی پارەدان</h3>
+  <table class="table">
+    <thead><tr><th style="width:70px">ID</th><th>User</th><th>ڕێگا</th><th>سەرچاوە</th><th>ژمارە</th><th>پۆینت</th><th>فی</th><th>دۆخ</th><th style="width:230px">کردار</th></tr></thead>
+    <tbody>
+      {% set _payout_rows = payouts if payouts is defined else rows %}
+      {% for r in _payout_rows %}
+        <tr>
+          <td>#{{ r.id }}</td>
+          <td>{{ r.user_id }}</td>
+          <td>{{ r.method }}</td>
+          <td>{{ r.provider }}</td>
+          <td>{{ r.account }}</td>
+          <td>{{ r.points }}</td>
+          <td>{{ r.fee_points or 0 }}</td>
+          <td>{{ r.status }}</td>
+          <td>
+            {% if r.status == 'pending' %}
+              <div style="display:flex;gap:.35rem;flex-wrap:wrap;align-items:center">
+                <form method="post" action="{{ url_for('admin_payout_approve', pay_id=r.id) }}">
+                  <input type="hidden" name="fee_points" value="{{ payout_fee_points or 5 }}">
+                  <button class="btn small">ڕەزامەندی</button>
+                </form>
+                <form method="post" action="{{ url_for('admin_payout_reject', pay_id=r.id) }}" onsubmit="return confirm('دڵنیایت لە ڕەتکردنەوە؟');">
+                  <button class="btn small danger">ڕەتکردنەوە</button>
+                </form>
+              </div>
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="9">هیچ داواکارییەک نییە.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

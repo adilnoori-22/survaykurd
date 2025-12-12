@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block title %}پۆرتاڵی یاری{% endblock %}
+{% block content %}
+<h2>پۆرتاڵی یاری</h2>
+
+<form method='post' class='card' style='display:flex;gap:10px;align-items:center'>
+  <span class='muted'>ناوی بەکارهێنەر:</span>
+  <input name='username' placeholder='ناوت بنووسە' value='{{ session.username or "" }}' style='width:220px'>
+  <button class='btn small'>هەڵبژاردن</button>
+</form>
+
+<h3 style='margin-top:16px'>لیستی یارییەکان</h3>
+<div class='grid'>
+  {% for g in games %}
+  <div class='card'>
+    <div style='display:flex;justify-content:space-between;align-items:center'>
+      <div style='font-weight:700'>{{ g.title }}</div>
+      <span class='pill'>🪙 {{ game_points_label(g.id) }}</span>
+    </div>
+
+    <!-- ناونانی ژوور + پیوەستن -->
+    <div class='row' style='gap:.5rem;flex-wrap:wrap;margin:.5rem 0'>
+      <input id='room-{{ g.id }}' placeholder='کۆدی ژوور/ناو' value='public' style='width:180px'>
+      <button class='btn' type='button' onclick='joinRoom({{ g.id }})'>دەستپێکردن</button>
+      <input id='roomname-{{ g.id }}' placeholder='ناوی ژوور (ئارەزوومەندانە)' style='width:180px'>
+      <button class='btn secondary' type='button' onclick='createRoom({{ g.id }})'>+ دروستکردنی ژوور</button>
+    </div>
+
+    <!-- ژوورە کۆتاهەکان -->
+    <div>
+      <div class='muted' style='margin-bottom:.3rem'>ژوورە کۆتاهەکان</div>
+      <div id='rooms-{{ g.id }}' style='display:flex;gap:.4rem;flex-wrap:wrap'></div>
+      <button class='btn small' type='button' onclick='listRooms({{ g.id }})'>↻ نوێکردنەوەی ژوورەکان</button>
+    </div>
+  </div>
+  {% else %}<div class='muted'>هیچ یارییەک نییە.</div>{% endfor %}
+</div>
+
+<script src='/static/portal.js'></script>
+<script>
+  // دواتر لە لۆددا، بۆ هەر یارییەک ژوورەکان بخوێنەوە
+  (function(){ {% for g in games %} try{ listRooms({{ g.id }}); }catch(e){} {% endfor %} })();
+</script>
+{% endblock %}

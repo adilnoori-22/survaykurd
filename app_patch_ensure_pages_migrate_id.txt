@@ -1,0 +1,85 @@
+# ===== [PATCH] Robust ensure_pages_schema() with id-migration =====
+# Paste this overwrite of ensure_pages_schema() inside app.py
+
+def ensure_pages_schema():
+    con = _db(); c = con.cursor()
+    # Create table if missing (with full schema)
+    c.execute("""CREATE TABLE IF NOT EXISTS pages(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        slug TEXT UNIQUE NOT NULL,
+        title TEXT NOT NULL,
+        content TEXT NOT NULL,
+        is_active INTEGER DEFAULT 1,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        template TEXT DEFAULT 'page',
+        path TEXT
+    )""")
+    # Check columns; if `id` missing (legacy schema), rebuild
+    def _has_col(table, col):
+        try:
+            cols = c.execute(f"PRAGMA table_info({table})").fetchall()
+            for r in cols:
+                name = r["name"] if isinstance(r, sqlite3.Row) else r[1]
+                if name == col: return True
+        except Exception:
+            return False
+        return False
+
+    if not _has_col("pages", "id"):
+        # migrate into pages_new
+        cols = { (r["name"] if isinstance(r, sqlite3.Row) else r[1]) for r in c.execute("PRAGMA table_info(pages)") }
+        def H(x): return x in cols
+        slug_expr     = "slug" if H("slug") else "NULL"
+        title_expr    = "title" if H("title") else ( "slug" if H("slug") else "'Untitled'" )
+        content_expr  = "content" if H("content") else "''"
+        is_active_expr= "COALESCE(is_active,1)" if H("is_active") else "1"
+        template_expr = "COALESCE(template,'page')" if H("template") else "'page'"
+        path_expr     = "path" if H("path") else "NULL"
+        updated_expr  = "COALESCE(updated_at, datetime('now'))" if H("updated_at") else "datetime('now')"
+        try:
+            c.execute("PRAGMA foreign_keys=OFF")
+            c.execute("BEGIN IMMEDIATE")
+            c.execute("""CREATE TABLE pages_new(
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug TEXT UNIQUE NOT NULL,
+                title TEXT NOT NULL,
+                content TEXT NOT NULL,
+                is_active INTEGER DEFAULT 1,
+                updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                template TEXT DEFAULT 'page',
+                path TEXT
+            )""")
+            copy_sql = f"""
+            INSERT INTO pages_new (slug,title,content,is_active,template,path,updated_at)
+            SELECT {slug_expr}, {title_expr}, {content_expr}, {is_active_expr}, {template_expr}, {path_expr}, {updated_expr}
+            FROM pages
+            """
+            c.execute(copy_sql)
+            c.execute("DROP TABLE pages")
+            c.execute("ALTER TABLE pages_new RENAME TO pages")
+            c.execute("COMMIT")
+        except Exception:
+            try: c.execute("ROLLBACK")
+            except Exception: pass
+            raise
+        finally:
+            c.execute("PRAGMA foreign_keys=ON")
+
+    # Ensure optional columns exist (no-op if already there)
+    for col, ddl in [
+        ("is_active", "INTEGER DEFAULT 1"),
+        ("updated_at", "TEXT DEFAULT CURRENT_TIMESTAMP"),
+        ("template", "TEXT DEFAULT 'page'"),
+        ("path", "TEXT")
+    ]:
+        if not _has_col("pages", col):
+            c.execute(f"ALTER TABLE pages ADD COLUMN {col} {ddl}")
+    # Fill nulls with defaults
+    try:
+        c.execute("UPDATE pages SET is_active=1 WHERE is_active IS NULL")
+        c.execute("UPDATE pages SET template='page' WHERE template IS NULL")
+        c.execute("UPDATE pages SET updated_at=datetime('now') WHERE updated_at IS NULL")
+    except Exception:
+        pass
+    con.commit(); con.close()
+# ===== [/PATCH] =====

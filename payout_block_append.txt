@@ -1,0 +1,143 @@
+# ===== Payout helpers & routes (DROP-IN BLOCK) =====
+# Put this AFTER your imports and AFTER you have get_db(), app, session, flash, jsonify, render_template available.
+
+import json
+
+def _get_setting(key, default=None):
+    con = get_db(); c = con.cursor()
+    try:
+        r = c.execute("SELECT value FROM app_settings WHERE key=?", (key,)).fetchone()
+        return (r['value'] if r else default)
+    finally:
+        con.close()
+
+def _ensure_payout_tables():
+    con = get_db()
+    c = con.cursor()
+    try:
+        c.execute("""
+CREATE TABLE IF NOT EXISTS payout_providers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    kind TEXT NOT NULL CHECK(kind in ('bank','mobile')),
+    is_active INTEGER DEFAULT 1,
+    fields_json TEXT DEFAULT '{}'
+)
+""")
+        c.execute("""
+CREATE TABLE IF NOT EXISTS user_payout_methods (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    provider_id INTEGER NOT NULL,
+    account_json TEXT NOT NULL,
+    is_default INTEGER DEFAULT 1,
+    status TEXT DEFAULT 'unverified',
+    verified_at TEXT
+)
+""")
+        # payout_requests table should already exist in your app; if not, uncomment next block:
+        # c.execute("""
+        # CREATE TABLE IF NOT EXISTS payout_requests (
+        #     id INTEGER PRIMARY KEY AUTOINCREMENT,
+        #     user_id INTEGER,
+        #     method TEXT,
+        #     provider TEXT,
+        #     account TEXT,
+        #     points INTEGER,
+        #     fee_points INTEGER DEFAULT 0,
+        #     status TEXT DEFAULT 'pending',
+        #     created_at TEXT,
+        #     processed_at TEXT
+        # )
+        # """)
+        con.commit()
+    finally:
+        con.close()
+
+@app.route("/api/payout/provider/<int:pid>/fields")
+def api_payout_provider_fields(pid):
+    _ensure_payout_tables()
+    con = get_db(); c = con.cursor()
+    try:
+        r = c.execute("SELECT fields_json FROM payout_providers WHERE id=? AND is_active=1", (pid,)).fetchone()
+        fields = json.loads(r['fields_json'] or "{}") if r else {}
+        return jsonify(fields)
+    finally:
+        con.close()
+
+@app.route("/wallet/payout", methods=["GET","POST"])
+def wallet_payout():
+    uid = session.get("user_id")
+    if not uid:
+        try:
+            flash("تکایە بچۆ ژوورەوە.", "error")
+        except Exception:
+            pass
+        return redirect(url_for("login")) if "login" in globals() else redirect("/")
+
+    _ensure_payout_tables()
+    con = get_db(); c = con.cursor()
+    try:
+        money_per_point = int(_get_setting("money_per_point", 10) or 10)
+        min_payout_points = int(_get_setting("min_payout_points", 100) or 100)
+        payout_fee_points = int(_get_setting("payout_fee_points", 5) or 5)
+
+        prof = c.execute("SELECT wallet_points FROM profiles WHERE id=?", (uid,)).fetchone()
+        balance = int(prof["wallet_points"] or 0) if prof else 0
+
+        if request.method == "POST":
+            provider_id = int(request.form.get("provider_id") or 0)
+            points = int(request.form.get("points") or 0)
+            if points < min_payout_points:
+                flash("کەمترە لە کەمترین پۆینت.", "error")
+                return redirect(url_for("wallet_payout"))
+            need = points + payout_fee_points
+            if balance < need:
+                flash("پۆینتەکانت بەھێز نیەن.", "error")
+                return redirect(url_for("wallet_payout"))
+
+            prov = c.execute("SELECT id,name,kind,fields_json FROM payout_providers WHERE id=? AND is_active=1", (provider_id,)).fetchone()
+            if not prov:
+                flash("سەرچاوە نەدۆزرایەوە/ناچالاکە.", "error")
+                return redirect(url_for("wallet_payout"))
+
+            fields = json.loads(prov["fields_json"] or "{}")
+            account = {}
+            import re as _re
+            for key, spec in fields.items():
+                val = (request.form.get(f"acc_{key}") or "").strip()
+                if spec.get("required") and not val:
+                    flash(f"خانە {key} دەبێت پڕ بکرێت.", "error")
+                    return redirect(url_for("wallet_payout"))
+                pat = spec.get("pattern")
+                if pat and val and not _re.match(pat, val):
+                    flash(f"نرخی {key} نادروستە.", "error")
+                    return redirect(url_for("wallet_payout"))
+                account[key] = val
+
+            c.execute("INSERT INTO user_payout_methods(user_id, provider_id, account_json, is_default, status) VALUES(?,?,?,?,?)",
+                      (uid, prov["id"], json.dumps(account), 1, "unverified"))
+
+            main_acc = account.get("mobile") or account.get("iban") or account.get("card") or json.dumps(account)
+            c.execute("""INSERT INTO payout_requests(user_id, method, provider, account, points, fee_points, status, created_at)
+                         VALUES(?,?,?,?,?,?, 'pending', datetime('now'))""",
+                      (uid, prov["kind"], prov["name"], main_acc, points, payout_fee_points))
+
+            con.commit()
+            flash("داواکاری پەرەدان پێشکەش کرا. چاوەڕێی پەسەندکردنی ئەدمین بکه‌.", "success")
+            return redirect(url_for("wallet_payout"))
+
+        providers = c.execute("SELECT id,name,kind,is_active,fields_json FROM payout_providers WHERE is_active=1 ORDER BY id DESC").fetchall()
+        methods = c.execute("""SELECT m.id, m.provider_id, m.account_json, m.is_default, m.status, p.name as provider_name, p.kind as provider_kind
+                               FROM user_payout_methods m JOIN payout_providers p ON p.id=m.provider_id
+                               WHERE m.user_id=? ORDER BY m.id DESC""", (uid,)).fetchall()
+
+        return render_template("wallet_payout.html",
+                               balance=balance,
+                               money_per_point=money_per_point,
+                               min_payout_points=min_payout_points,
+                               payout_fee_points=payout_fee_points,
+                               providers=providers, methods=methods)
+    finally:
+        con.close()
+# ===== end payout block =====

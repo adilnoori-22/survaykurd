@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}گەر پاسۆردت لەبیرچووە{% endblock %}
+{% block content %}
+<h2>گەر پاسۆردت لەبیرچووە</h2>
+<form method="post" style="max-width:480px;display:grid;gap:10px">
+  <div>
+    <label>یوزەرنەیم</label>
+    <input type="text" name="username" required>
+  </div>
+  <div>
+    <label>ئیمەیل (ئاختیاری)</label>
+    <input type="email" name="email" placeholder="هەمان ئیمەیلی خۆت">
+  </div>
+  <div>
+    <label>ژمارەی مۆبایل (ئاختیاری)</label>
+    <input type="text" name="phone" placeholder="7xxxxxxxxx">
+  </div>
+  <button class="btn" type="submit">ناردنی کۆدی گەڕاندنەوە</button>
+</form>
+
+<p><a href="{{ url_for('login') }}">گەڕانەوە بۆ چوونەژوورەوە</a></p>
+{% endblock %}

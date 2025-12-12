@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}داشبۆردی ئەdmین{% endblock %}
+{% block content %}
+<h2>داشبۆرد</h2>
+<div class="grid grid-3">
+  <a class="card" href="{{ url_for('admin_pages') }}"><h3>Design (Pages)</h3><p class="muted">دروستکردن و دەستکاریکردنی پەڕەکان.</p></a>
+  <a class="card" href="{{ url_for('admin_surveys') }}"><h3>Surveys</h3><p class="muted">دروستکردن/ڕێکخستن/پرسیارەکان.</p></a>
+  <a class="card" href="{{ url_for('admin_ads') }}"><h3>Ads</h3><p class="muted">زیادکردن/چالاککردن/سڕینەوە.</p></a>
+  <a class="card" href="{{ url_for('admin_games') }}"><h3>Games</h3><p class="muted">زیادکردن/چالاککردن/سڕینەوە.</p></a>
+</div>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Design — گۆڕینی پۆینت بەدەستی{% endblock %}
+{% block content %}
+<h2>گۆڕینی پۆینتی ئەندام (دەستی) — تەنها ئەدمین</h2>
+
+<form method="post" class="card" style="max-width:760px">
+  <div class="row">
+    <label>ناسێنەری بەکارهێنەر</label>
+    <input type="text" name="identifier" placeholder="username یان email یان ID" required>
+    <div class="muted">نموونە: <code>kawa</code> یان <code>kawa@example.com</code> یان <code>42</code></div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="row">
+      <label>جۆری مامەڵە</label>
+      <select name="type">
+        <option value="adjust" selected>adjust (پێشنیار کراو)</option>
+        <option value="earn">earn (زیادکردن)</option>
+        <option value="spend">spend (کەمکردن)</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>ژمارەی پۆینت (+/-)</label>
+      <input type="number" name="points" step="1" required placeholder="مثال: 50 یان -20">
+    </div>
+    <div class="row">
+      <label>تێبینی</label>
+      <input type="text" name="note" placeholder="هۆکار/تێبینی (بە دڵخواز)">
+    </div>
+  </div>
+
+  <div class="row" style="gap:.5rem">
+    <button class="btn" type="submit">جێبەجێکردن</button>
+    <a class="btn secondary" href="{{ url_for('admin_dashboard') }}">گەڕانەوە</a>
+  </div>
+</form>
+
+{% if tx %}
+  <h3 style="margin-top:18px">دواین مامەڵەکان</h3>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>User ID</th>
+        <th>جۆر</th>
+        <th>پۆینت</th>
+        <th>تێبینی</th>
+        <th>کات</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in tx %}
+        <tr>
+          <td>{{ r['id'] }}</td>
+          <td>{{ r['user_id'] }}</td>
+          <td>{{ r['type'] }}</td>
+          <td>{{ r['points'] }}</td>
+          <td>{{ r['note'] }}</td>
+          <td>{{ r['created_at'] }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="6">هیچ مامەڵەیەک نییە.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+<a class="btn secondary" href="{{ url_for('admin_payouts') }}">گەڕانەوە</a>
+{% endif %}
+{% endblock %}

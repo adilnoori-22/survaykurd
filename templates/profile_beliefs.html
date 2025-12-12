@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}بیروباوەڕ{% endblock %}
+{% block content %}
+<h2>بیروباوەڕ</h2>
+<form method="post" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;max-width:900px">
+  <div><label>ئاین</label><select name="religion">{% for r in religions %}<option>{{ r }}</option>{% endfor %}</select></div>
+  <div><label>باوەڕت بە ژیانی ئاشتییانە هەیە؟</label><select name="believe_coexist">{% for y in yesno %}<option>{{ y }}</option>{% endfor %}</select></div>
+  <div><label>باوەڕت بە ئاینەکانی تر هەیە؟</label><select name="believe_other_religions">{% for y in yesno %}<option>{{ y }}</option>{% endfor %}</select></div>
+  <div><label>سەردانی شوێنە ئاینیدەکەیت؟</label><select name="visit_religious_places">{% for v in visits %}<option>{{ v }}</option>{% endfor %}</select></div>
+  <div><label>تاریقەت</label><select name="tariqa">{% for t in tariqas %}<option>{{ t }}</option>{% endfor %}</select></div>
+  <div><label>هاوڕێی دەرەوەی ئاینەکەت هەیە؟</label><select name="friends_other_religions">{% for y in yesno %}<option>{{ y }}</option>{% endfor %}</select></div>
+
+  <div style="grid-column:1/3"><button class="btn" type="submit">ناردن</button></div>
+</form>
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}مەرجەکانی ڕاپرسی — {{ survey.title }}{% endblock %}
+{% block content %}
+<h2>مەرجەکانی هاتەژوورەوە — <span class="muted">{{ survey.title }}</span></h2>
+
+<form method="post" class="card">
+  <h3>فلتەری خێرا</h3>
+  <div class="grid grid-3">
+    <div class="row">
+      <label>تەمەن کەمترین</label>
+      <input type="number" name="min_age" value="{{ rules.min_age or '' }}">
+    </div>
+    <div class="row">
+      <label>تەمەن زۆرترین</label>
+      <input type="number" name="max_age" value="{{ rules.max_age or '' }}">
+    </div>
+    <div class="row">
+      <label>ڕەگەز</label>
+      <select name="gender">
+        <option value="" {{ 'selected' if not rules.get('gender') }}>هەردوو</option>
+        <option value="نێر" {{ 'selected' if rules.get('gender')=='نێر' }}>نێر</option>
+        <option value="مادن" {{ 'selected' if rules.get('gender')=='مادن' }}>مادن</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <label>ئەندامی پارت سیاسی</label>
+      <select name="political_member">
+        <option value="" {{ 'selected' if not rules.get('political_member') }}>هەردوو</option>
+        <option value="بەڵێ" {{ 'selected' if rules.get('political_member')=='بەڵێ' }}>بەڵێ</option>
+        <option value="نەخێر" {{ 'selected' if rules.get('political_member')=='نەخێر' }}>نەخێر</option>
+      </select>
+    </div>
+    <div class="row">
+      <label>بڕوانامەکان (بە کۆما)</label>
+      <input name="degrees" value="{{ (rules.degrees|join(', ')) if rules.degrees else '' }}">
+    </div>
+    <div class="row">
+      <label>شارەکان (بە کۆما)</label>
+      <input name="cities" value="{{ (rules.cities|join(', ')) if rules.cities else '' }}">
+    </div>
+    <div class="row">
+      <label>باری خێزانی (بە کۆما)</label>
+      <input name="family_status" value="{{ (rules.family_status|join(', ')) if rules.family_status else '' }}">
+    </div>
+    <div class="row">
+      <label>جۆری کار (بە کۆما)</label>
+      <input name="work_types" value="{{ (rules.work_types|join(', ')) if rules.work_types else '' }}">
+    </div>
+  </div>
+</form>
+
+{% if rule_fields %}
+<form method="post" class="card" style="margin-top:14px" onsubmit="serializeRules()">
+  <h3>فلتەری پێشکەوتوو (بەرهەم هێنانی قاعدە)</h3>
+  <p class="muted">فلتەرەکان زیاد بکە → دواتر «پاشەکەوت» بکە. دەتوانیت چەندین قاعدە زیاد بکەیت.</p>
+
+  <div id="rules"></div>
+
+  <div class="card" style="margin-top:10px">
+    <div class="grid grid-3">
+      <div class="row">
+        <label>خانە/پرسیار</label>
+        <select id="f_field">
+          {% for f in rule_fields %}
+            <option value="{{ f.key }}" data-type="{{ f.type }}" data-opts='{{ (f.options|tojson) if f.options else "[]" }}'>{{ f.label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="row">
+        <label>ئۆپەراتۆر</label>
+        <select id="f_op">
+          <option value="=">=</option>
+          <option value="in">لە نێو لیست</option>
+          <option value=">=">&ge;</option>
+          <option value="<=">&le;</option>
+          <option value="contains">contains</option>
+        </select>
+      </div>
+      <div class="row" id="valWrap">
+        <label>نرخ</label>
+        <input id="f_val" placeholder="نرخ/کۆما-جیاکراو">
+      </div>
+    </div>
+    <button class="btn" type="button" onclick="addRule()">+ زیادکردن</button>
+  </div>
+
+  <input type="hidden" name="advanced_rules_json" id="advanced_rules_json" value='{{ rules.advanced_rules_json or "[]" }}'>
+  <div style="margin-top:10px">
+    <button class="btn" type="submit">پاشەکەوت</button>
+    <a class="btn secondary" href="{{ url_for('admin_surveys') }}">گەرانەوە</a>
+  </div>
+</form>
+{% endif %}
+
+{% block scripts %}
+<script>
+  // state
+  let rules = [];
+  try { rules = JSON.parse(document.getElementById('advanced_rules_json')?.value || "[]"); } catch(e){ rules = []; }
+
+  function renderRules(){
+    const wrap = document.getElementById('rules');
+    wrap.innerHTML = '';
+    if (!rules.length){ wrap.innerHTML = '<div class="muted">هێشتا هیچ فلتەرێکت زیاد نەکردووە.</div>'; return; }
+    rules.forEach((r, i) => {
+      const el = document.createElement('div');
+      el.className = 'card';
+      el.style.marginTop = '8px';
+      el.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+          <div><b>${r.label}</b> — ${r.op} — <code>${Array.isArray(r.val)? r.val.join(', ') : r.val}</code></div>
+          <button class="btn small danger" type="button" onclick="delRule(${i})">سڕینەوە</button>
+        </div>`;
+      wrap.appendChild(el);
+    });
+  }
+  function addRule(){
+    const fld = document.getElementById('f_field');
+    const op  = document.getElementById('f_op').value;
+    const type= fld.options[fld.selectedIndex].dataset.type || 'text';
+    const label= fld.options[fld.selectedIndex].text;
+    const opts = JSON.parse(fld.options[fld.selectedIndex].dataset.opts || "[]");
+
+    let val = document.getElementById('f_val').value.trim();
+    if (!val && opts.length){ // allow pick from options
+      val = opts[0];
+    }
+    if (!val){ alert('نرخ بنووسە یان هەڵبژێرە.'); return; }
+
+    // list support
+    if (op==='in'){
+      val = val.split(',').map(s=>s.trim()).filter(Boolean);
+    }
+    rules.push({key: fld.value, label, op, val, type});
+    renderRules();
+    document.getElementById('f_val').value = '';
+  }
+  function delRule(i){ rules.splice(i,1); renderRules(); }
+  function serializeRules(){
+    document.getElementById('advanced_rules_json').value = JSON.stringify(rules);
+  }
+  renderRules();
+</script>
+{% endblock %}
+{% endblock %}

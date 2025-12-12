@@ -1,0 +1,231 @@
+{% extends "base.html" %}
+{% block title %}پڕکردنەوەی ڕاپرسی — {{ survey.title }}{% endblock %}
+{% block content %}
+
+<h2>{{ survey.title }}</h2>
+{% if survey.description %}<p class="muted">{{ survey.description }}</p>{% endif %}
+
+<form method="post" class="card" id="surveyForm">
+  <div class="grid">
+    {% for q in questions %}
+      <div class="card qblock"
+           data-qid="{{ q.id }}"
+           {% if q.show_if_json %} data-show-if='{{ q.show_if_json|e }}' {% endif %}
+           style="padding:14px">
+        <label style="font-weight:700; display:block; margin-bottom:8px">
+          {{ loop.index }}) {{ q.q_text }}
+          {% if q.required %}<span class="muted" style="font-weight:400"> (لازم)</span>{% endif %}
+        </label>
+
+        {# ---------- Inputs ---------- #}
+        {% if q.q_type == 'text' %}
+          <input type="text" name="q{{ q.id }}" {% if q.required %}required{% endif %}>
+
+        {% elif q.q_type == 'textarea' %}
+          <textarea name="q{{ q.id }}" rows="4" {% if q.required %}required{% endif %}></textarea>
+
+        {% elif q.q_type == 'number' %}
+          <input type="number" name="q{{ q.id }}" {% if q.required %}required{% endif %}>
+
+        {% elif q.q_type == 'date' %}
+          <input type="date" name="q{{ q.id }}" {% if q.required %}required{% endif %}>
+
+        {% elif q.q_type == 'select' %}
+          <select name="q{{ q.id }}" {% if q.required %}required{% endif %}>
+            <option value="">—</option>
+            {% for o in q.options %}<option value="{{ o }}">{{ o }}</option>{% endfor %}
+          </select>
+
+        {% elif q.q_type == 'radio' %}
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap">
+            {% for o in q.options %}
+              <label style="display:flex; align-items:center; gap:.35rem; border:1px solid var(--border); padding:6px 10px; border-radius:10px;">
+                <input type="radio" name="q{{ q.id }}" value="{{ o }}" {% if q.required and loop.first %}required{% endif %}>
+                <span>{{ o }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+        {% elif q.q_type == 'checkbox' %}
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap">
+            {% for o in q.options %}
+              <label style="display:flex; align-items:center; gap:.35rem; border:1px solid var(--border); padding:6px 10px; border-radius:10px;">
+                <input type="checkbox" name="q{{ q.id }}" value="{{ o }}">
+                <span>{{ o }}</span>
+              </label>
+            {% endfor %}
+            {% if q.required %}<input type="hidden" data-require-one="q{{ q.id }}">{% endif %}
+          </div>
+
+        {% elif q.q_type == 'yesno' %}
+          <div style="display:flex; gap:.6rem; flex-wrap:wrap">
+            {% for o in ['بەڵێ','نەخێر'] %}
+              <label style="display:flex; align-items:center; gap:.35rem; border:1px solid var(--border); padding:6px 10px; border-radius:10px;">
+                <input type="radio" name="q{{ q.id }}" value="{{ o }}" {% if q.required and loop.first %}required{% endif %}>
+                <span>{{ o }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+        {% elif q.q_type == 'rating5' %}
+          <div style="display:flex; gap:.5rem; align-items:center">
+            {% for n in [1,2,3,4,5] %}
+              <label style="display:flex; align-items:center; gap:.35rem">
+                <input type="radio" name="q{{ q.id }}" value="{{ n }}" {% if q.required and loop.first %}required{% endif %}>
+                <span>⭐ {{ n }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+        {% elif q.q_type == 'scale10' %}
+          <div style="display:flex; gap:.4rem; flex-wrap:wrap">
+            {% for n in range(1,11) %}
+              <label style="display:flex; align-items:center; gap:.25rem">
+                <input type="radio" name="q{{ q.id }}" value="{{ n }}" {% if q.required and loop.first %}required{% endif %}>
+                <span>{{ n }}</span>
+              </label>
+            {% endfor %}
+          </div>
+
+        {% else %}
+          <input type="text" name="q{{ q.id }}">
+        {% endif %}
+
+        <div class="muted" style="margin-top:6px">QID: {{ q.id }}</div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <div class="row" style="gap:.5rem; margin-top:12px">
+    <button class="btn" type="submit">ناردن</button>
+    <!-- گۆڕان لێرە بوو: surveys → surveys_page -->
+    <a class="btn secondary" href="{{ url_for('surveys_page') }}">گەڕانەوە</a>
+  </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ===== Show-If engine (simple + legacy) & disable hidden inputs ===== */
+function normYesNo(v){
+  if (v == null) return v;
+  v = String(v).trim().toLowerCase();
+  const YES = ['yes','بەڵێ','بلە','بله','balê','bale','نعم'];
+  const NO  = ['no','نەخێر','nakher','na','لا'];
+  if (YES.includes(v)) return 'yes';
+  if (NO.includes(v))  return 'no';
+  return v;
+}
+function readAnswers(){
+  const ans = {};
+  document.querySelectorAll('.qblock').forEach(b => {
+    const id = Number(b.dataset.qid);
+    const name = 'q' + id;
+    const radios = b.querySelectorAll('input[type=radio][name="'+name+'"]');
+    const checks = b.querySelectorAll('input[type=checkbox][name="'+name+'"]');
+    const sel    = b.querySelector('select[name="'+name+'"]');
+    const num    = b.querySelector('input[type=number][name="'+name+'"]');
+    const txt    = b.querySelector('input[type=text][name="'+name+'"], textarea[name="'+name+'"]');
+    let v = null;
+    if (radios.length){
+      const ch = b.querySelector('input[type=radio][name="'+name+'"]:checked');
+      v = ch ? ch.value : null;
+    } else if (checks.length){
+      v = Array.from(checks).filter(x=>x.checked).map(x=>x.value);
+    } else if (sel){
+      v = sel.value;
+    } else if (num){
+      v = num.value === '' ? null : Number(num.value);
+    } else if (txt){
+      v = txt.value;
+    }
+    ans[id] = v;
+  });
+  return ans;
+}
+function evalSimple(cond, answers){
+  if (cond.all) return cond.all.every(c => evalSimple(c, answers));
+  if (cond.any) return cond.any.some (c => evalSimple(c, answers));
+  const dep = cond.depends_on;
+  if (dep == null) return true;
+  let val = answers[dep];
+  val = normYesNo(val);
+  if (typeof cond.equals === 'string') cond.equals = normYesNo(cond.equals);
+  if (Array.isArray(cond.equals_any)){
+    cond.equals_any = cond.equals_any.map(x => typeof x === 'string' ? normYesNo(x) : x);
+  }
+  if ('equals_any' in cond) return Array.isArray(cond.equals_any) && cond.equals_any.includes(val);
+  if ('equals' in cond)     return String(val) === String(cond.equals);
+  if ('not_equals' in cond) return String(val) !== String(cond.not_equals);
+  if ('contains' in cond)   return Array.isArray(val) ? val.includes(cond.contains) : String(val).includes(String(cond.contains));
+  if ('gt' in cond)         return Number(val) >  Number(cond.gt);
+  if ('gte' in cond)        return Number(val) >= Number(cond.gte);
+  if ('lt' in cond)         return Number(val) <  Number(cond.lt);
+  if ('lte' in cond)        return Number(val) <= Number(cond.lte);
+  return true;
+}
+function evalLegacy(arr, answers){
+  if (!Array.isArray(arr) || !arr.length) return true;
+  return arr.every(r => {
+    const qid = Number(r.qid || r.QID || r.id);
+    const op  = (r.op || '=').trim();
+    const val = r.val;
+    let ans   = answers[qid];
+    ans = normYesNo(ans);
+    const valN = typeof val === 'string' ? normYesNo(val) : val;
+    if (op === '=' ) return String(ans) === String(valN);
+    if (op === 'in') {
+      const list = Array.isArray(valN) ? valN.map(String) : String(valN).split(',').map(s=>s.trim());
+      if (Array.isArray(ans)) return ans.some(v => list.includes(String(v)));
+      return list.includes(String(ans));
+    }
+    if (op === '>=') return Number(ans) >= Number(valN);
+    if (op === '<=') return Number(ans) <= Number(valN);
+    if (op === '>' ) return Number(ans) >  Number(valN);
+    if (op === '<' ) return Number(ans) <  Number(valN);
+    if (op === 'contains') {
+      if (Array.isArray(ans)) return ans.map(String).includes(String(valN));
+      return String(ans).includes(String(valN));
+    }
+    return true;
+  });
+}
+function applyShowIf(){
+  const answers = readAnswers();
+  document.querySelectorAll('.qblock').forEach(b => {
+    const raw = (b.getAttribute('data-show-if') || '').trim();
+    let cond = null, ok = true;
+    if (raw){
+      try { cond = JSON.parse(raw); } catch(e) { cond = null; }
+      if (Array.isArray(cond)) ok = evalLegacy(cond, answers);
+      else if (cond) ok = evalSimple(cond, answers);
+    }
+    b.style.display = ok ? '' : 'none';
+    b.querySelectorAll('input,select,textarea').forEach(el => {
+      el.disabled = !ok;
+      if (!ok){
+        if (el.type === 'radio' || el.type === 'checkbox') el.checked = false;
+        else el.value = '';
+      }
+    });
+  });
+}
+function validateCheckboxRequired(e){
+  const hidden = document.querySelectorAll('input[type="hidden"][data-require-one]');
+  for (const h of hidden) {
+    const name = h.getAttribute('data-require-one');
+    const block = h.closest('.qblock');
+    if (block && block.style.display === 'none') continue;
+    const any = document.querySelector('input[type="checkbox"][name="'+name+'"]:checked');
+    if (!any) { alert('تکایە لانیکەم یەک هەڵبژێرە بۆ ئەم خانەیە.'); e.preventDefault(); return false; }
+  }
+  return true;
+}
+document.addEventListener('change', (e) => {
+  if (e.target && e.target.name && e.target.name.startsWith('q')) applyShowIf();
+});
+document.addEventListener('DOMContentLoaded', applyShowIf);
+document.getElementById('surveyForm').addEventListener('submit', validateCheckboxRequired);
+</script>
+{% endblock %}

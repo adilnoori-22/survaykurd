@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}گۆڕینی پاسۆرد{% endblock %}
+{% block content %}
+<h2>گۆڕینی پاسۆرد</h2>
+<form method="post" class="card" style="max-width:480px">
+  <div class="row">
+    <label>پاسۆردی نوێ</label>
+    <input type="password" name="password" required>
+    <small>کەمتر نەبێت لە ٨ پیت؛ پێویستە ئەلفووبێت + ژمارە هەبێت.</small>
+  </div>
+  <div class="row">
+    <label>دووبارە پاسۆرد</label>
+    <input type="password" name="password2" required>
+  </div>
+  <button class="btn" type="submit">پاشەکەوت</button>
+</form>
+{% endblock %}

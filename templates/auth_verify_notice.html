@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}پێویستی بە سەلماندنی ئیمەیڵ{% endblock %}
+{% block content %}
+<h2>پێویستی بە سەلماندنی ئیمەیڵ</h2>
+<p>پێویستە ئیمەیلەکەت سەلمێنیت پێش چوونەژوورەوە.</p>
+<form method="get" action="{{ url_for('verify_resend') }}" class="card" style="max-width:480px">
+  <input type="hidden" name="email" value="{{ email }}">
+  <button class="btn" type="submit">ناردنەوەی لینک</button>
+  <a class="btn ghost" href="{{ url_for('login') }}">گەڕانەوە</a>
+</form>
+{% endblock %}

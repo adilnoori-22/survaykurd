@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}چوونەژوورەوە{% endblock %}
+{% block content %}
+<h2>چوونەژوورەوە</h2>
+<form method="post" class="card" style="max-width:480px">
+  <div class="row">
+    <label>یوزەرنەیم یان ئیمەیڵ</label>
+    <input type="text" name="user_or_email" required>
+  </div>
+  <div class="row">
+    <label>پاسۆرد</label>
+    <input type="password" name="password" required>
+  </div>
+  <button class="btn" type="submit">چوونەژوورەوە</button>
+
+  <div style="display:flex; gap:1rem; margin-top:1rem; flex-wrap:wrap">
+    <a class="btn ghost" href="{{ url_for('password_forgot') }}">لەبیرچوونەوەی پاسۆرد</a>
+    <a class="btn ghost" href="{{ url_for('register') }}">تۆمارکردن</a>
+  </div>
+</form>
+{% endblock %}

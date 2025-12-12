@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block title %}Setup پڕۆفایل{% endblock %}
+{% block content %}
+<h2>Setup پڕۆفایل</h2>
+<p class="muted">هەر پاکێجێک پڕ بکەوە، {{ pts }} پۆینت وەردەگریت.</p>
+<div class="grid grid-3">
+  {% for key,title in sections %}
+    <div class="card">
+      <h3>{{ title }}</h3>
+      <p>{{ '✓ پڕکراوە' if detail.get(key) else '✗ هێشتا پڕنەکراوە' }}</p>
+      <a class="btn" href="{{ url_for('profile_sec_' + key) }}">پڕکردنەوە</a>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

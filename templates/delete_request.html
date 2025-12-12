@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}سڕینەوەی ئەکاونت — داواكردن{% endblock %}
+{% block content %}
+<h2>سڕینەوەی ئەکاونت</h2>
+<p>بۆ سەلامەتی، پێش سڕینەوە کۆد دەنێردرێت (DEV: لە پەڕە دەبینرێت).</p>
+<form method="post" style="max-width:520px;display:grid;gap:10px">
+  <div>
+    <label>یوزەرنەیم</label>
+    <input type="text" name="username" required>
+  </div>
+  <div>
+    <label>ئیمەیل (ئاختیاری)</label>
+    <input type="email" name="email">
+  </div>
+  <div>
+    <label>ژمارەی مۆبایل (ئاختیاری)</label>
+    <input type="text" name="phone" placeholder="7xxxxxxxxx">
+  </div>
+  <button class="btn" type="submit">ناردنی کۆدی سڕینەوە</button>
+</form>
+<p><a href="{{ url_for('login') }}">گەڕانەوە</a></p>
+{% endblock %}

@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}پڕۆفایل{% endblock %}
+{% block content %}
+
+<h2>پڕۆفایل</h2>
+
+<div class="grid grid-2">
+  <!-- فرمەکە: پڕۆفایلی بنەڕەتی -->
+  <form method="post" class="card">
+    <div class="row">
+      <label>ناوە تەواو</label>
+      <input type="text" name="full_name" value="{{ (p.full_name or '') if p else '' }}">
+    </div>
+
+    <div class="row">
+      <label>ناوی باوك</label>
+      <input type="text" name="middle_name" value="{{ (p.middle_name or '') if p else '' }}">
+    </div>
+
+    <div class="row">
+      <label>نازناو</label>
+      <input type="text" name="nickname" value="{{ (p.nickname or '') if p else '' }}">
+    </div>
+
+    <div class="row">
+      <label>كۆدى مۆبایل</label>
+      <input type="text" name="phone_code" value="{{ (p.phone_code or '+964') if p else '+964' }}">
+    </div>
+
+    <div class="row">
+      <label>ژمارەی مۆبایل</label>
+      <input type="text" name="phone" value="{{ (p.phone or '') if p else '' }}" placeholder="07xx xxx xxxx">
+    </div>
+
+    <div class="grid grid-2">
+      <div class="row">
+        <label>ڕەگەز</label>
+        <select name="gender">
+          {% for g in opts.opt_genders %}
+            <option value="{{ g }}" {% if p and p.gender==g %}selected{% endif %}>{{ g }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row">
+        <label>تەمەن</label>
+        <select name="age">
+          <option value="">—</option>
+          {% for a in opts.opt_ages %}
+            <option value="{{ a }}" {% if p and p.age and (p.age|string)==a %}selected{% endif %}>{{ a }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="row">
+        <label>بڕوانامە</label>
+        <select name="degree">
+          {% for d in opts.opt_degrees %}
+            <option value="{{ d }}" {% if p and p.degree==d %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row">
+        <label>شار</label>
+        <select name="city">
+          {% for c in opts.opt_cities %}
+            <option value="{{ c }}" {% if p and p.city==c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="grid grid-2">
+      <div class="row">
+        <label>دۆخی خێزانی</label>
+        <select name="family_status">
+          {% for fs in opts.opt_famstat %}
+            <option value="{{ fs }}" {% if p and p.family_status==fs %}selected{% endif %}>{{ fs }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="row">
+        <label>جۆری كار</label>
+        <select name="work_type">
+          {% for wt in opts.opt_work_types %}
+            <option value="{{ wt }}" {% if p and p.work_type==wt %}selected{% endif %}>{{ wt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </div>
+
+    <div class="row">
+      <label>ئەندامی سیاسین؟</label>
+      <select name="political_member">
+        {% set pm = (p.political_member or '') if p else '' %}
+        <option value=""  {% if pm=='' %}selected{% endif %}>—</option>
+        <option value="بەڵێ" {% if pm=='بەڵێ' %}selected{% endif %}>بەڵێ</option>
+        <option value="نەخێر" {% if pm=='نەخێر' %}selected{% endif %}>نەخێر</option>
+      </select>
+    </div>
+
+    <div class="row" style="gap:.5rem">
+      <button class="btn" type="submit">پاشەکەوت</button>
+    </div>
+  </form>
+
+  <!-- لیستی پاکێجە دینامیکەکان -->
+  <div class="card">
+    <h3 style="margin-top:0">پاکێجەکان</h3>
+    <div class="grid">
+      {% for pkg in pkg_states %}
+        <div class="card" style="padding:10px; display:flex; align-items:center; justify-content:space-between">
+          <div>
+            <div style="font-weight:700">{{ pkg.title }}</div>
+            <div class="muted">{{ pkg.code }}</div>
+          </div>
+          <div style="display:flex; gap:.5rem; align-items:center">
+            {% if pkg.done %}
+              <span title="تەواوە">✅</span>
+            {% else %}
+              <span title="نەتمامە">⏳</span>
+            {% endif %}
+            <a class="btn small" href="{{ url_for('profile_sec_dynamic', code=pkg.code) }}">دەستکاری</a>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+    <p class="muted" style="margin-top:10px">
+      بۆ بەشداربوون لە ڕاپرسی، پێویستە هەموو پاکێجەکان تێدا پڕبکەیتەوە.
+    </p>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}یاری — {{ game['title'] if game else 'Game' }}
+<script>
+  // Force a pre-roll and block input until ad closes
+  window.AD_FORCE_PREROLL = true;
+  (function(){
+    var gate = document.createElement('div');
+    gate.id = 'ad-gate-overlay';
+    gate.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.2rem;text-align:center';
+    gate.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(255,255,255,.15);padding:16px 22px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.35)"><div>🎬 ڕیکلامی سەرەتای یاری…</div><div class="muted" style="font-size:.92rem;margin-top:6px;opacity:.85">تکایە چاوەڕێ بکە تا کۆتایی ڕیکلام</div></div>';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(gate); });
+    window.onInterstitialClosed = function(){ try{gate.remove();}catch(e){} };
+  })();
+</script>
+
+<script src="/static/js/stake_ui.js"></script>
+{% endblock %}
+{% block content %}
+{% if not game %}
+<div class="card">یاری نەدۆزرایەوە.</div>
+{% else %}
+<div class="grid" style="gap:12px">
+<div class="card">
+<h2>{{ game['title'] }}</h2>
+{% if awarded_points %}
+<div class="alert">👏 پاداشتت بەدەست هێنا: <strong>{{ awarded_points }}</strong> پۆینت.</div>
+{% endif %}
+{% if already_awarded %}
+<div class="alert">✅ پاداشتت پێشتر وەرگرتووە (ئەمڕۆ).</div>
+{% endif %}
+{% if game['embed_url'] %}
+<div style="aspect-ratio:16/9; background:#0b1220; border:1px solid var(--border); border-radius:12px; overflow:hidden">
+<iframe src="{{ game['embed_url'] }}" style="width:100%; height:100%; border:0" allowfullscreen loading="lazy"></iframe>
+</div>
+{% else %}
+<p class="muted">هیچ لینکێکی یاری دانەنراوە.</p>
+{% endif %}
+</div>
+
+
+<div class="card">
+<div class="muted">تێبینی: پاداشتی یاری‌کردن جارێک لە ڕۆژ دەدرێت.</div>
+<a class="btn" href="{{ url_for('games_page') }}">⬅︎ گەڕانەوە بۆ لیستی یاریەکان</a>
+</div>
+</div>
+<script src="/static/js/ads.js"></script>
+<script>
+  // ئەگەر adی سەرەتای یاری هاتووە، نیشانبدە و پاشان پۆینت بۆ بینین
+  if (AD_START){ 
+    showInterstitial(AD_START); 
+    creditAd({{ game_id }}, AD_START.id);  // ← پۆینتێك زیاد دەبێت بۆ ئەندامێ لۆگینبوو
+  }
+</script>
+</script>
+<script>window.AD_GAME_ID={{ game_id if game_id is defined else (game['id'] if game else 0) }};</script>
+<script src="/static/js/ad_hooks.js"></script>
+{% endif %}
+
+<script>
+  // Force a pre-roll and block input until ad closes
+  window.AD_FORCE_PREROLL = true;
+  (function(){
+    var gate = document.createElement('div');
+    gate.id = 'ad-gate-overlay';
+    gate.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9999;display:flex;align-items:center;justify-content:center;font-weight:700;color:#fff;font-size:1.2rem;text-align:center';
+    gate.innerHTML = '<div style="background:#0b1220;border:1px solid rgba(255,255,255,.15);padding:16px 22px;border-radius:12px;box-shadow:0 10px 25px rgba(0,0,0,.35)"><div>🎬 ڕیکلامی سەرەتای یاری…</div><div class="muted" style="font-size:.92rem;margin-top:6px;opacity:.85">تکایە چاوەڕێ بکە تا کۆتایی ڕیکلام</div></div>';
+    document.addEventListener('DOMContentLoaded', function(){ document.body.appendChild(gate); });
+    window.onInterstitialClosed = function(){ try{gate.remove();}catch(e){} };
+  })();
+</script>
+
+<script src="/static/js/stake_ui.js"></script>
+{% endblock %}

@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}{{ 'پاکێجی نوێ' if mode=='new' else 'دەستکاری پاکێج' }}{% endblock %}
+{% block content %}
+<h2>{{ 'پاکێجی نوێ' if mode=='new' else 'دەستکاری پاکێج' }}</h2>
+<form method="post" class="card" style="max-width:720px">
+  <div class="grid grid-2">
+    <div class="row">
+      <label>ناونیشانی پاکێج</label>
+      <input name="title" value="{{ pkg.title if pkg else '' }}" required>
+    </div>
+    <div class="row">
+      <label>کۆدی پاکێج (لاتەنی، وەک about/work ...)</label>
+      <input name="code" value="{{ pkg.code if pkg else '' }}" {{ 'readonly' if mode=='edit' }}>
+    </div>
+    <div class="row">
+      <label>پۆزی‌شەن/پلە</label>
+      <input type="number" name="position" value="{{ pkg.position if pkg else 0 }}">
+    </div>
+  </div>
+
+  <div style="margin-top:10px">
+    <button class="btn" type="submit">پاشەکەوت</button>
+    <a class="btn secondary" href="{{ url_for('admin_profile_schema') }}">گەرانەوە</a>
+  </div>
+</form>
+{% endblock %}

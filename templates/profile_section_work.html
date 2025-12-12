@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}کار{% endblock %}
+{% block content %}
+<h2>پاکێجی «کار»</h2>
+<form method="post" class="card">
+  <div class="row"><label>جۆری کار</label>
+    <select name="work_type">
+      <option>حکومی</option><option>ئەهلی</option><option>سەربەخۆ</option><option>رێکخراوەیی</option><option>حزبی</option><option>هیتر</option>
+    </select>
+  </div>
+  <div class="row"><label>ناونیشانی کار</label><input name="job_title" placeholder="مامۆستا/مهەندیس/…"></div>
+  <div class="row"><label>وەزيفە</label>
+    <select name="position">
+      <option>بەڕێوەبردنی گشتی</option><option>جێگری بەڕێوەبەر</option><option>لێپرسراوی هۆبە</option><option>فەرمانبەر</option><option>بەردەست</option><option>خاوەنی کار</option>
+    </select>
+  </div>
+  <div class="row"><label>بواری کار</label>
+    <select name="sector">
+      <option>تەکنەلۆژیا</option><option>یاسایی</option><option>گەشەپێدانی مرۆیی</option><option>فێرکاری</option><option>ئاینی</option><option>پزیشکی</option><option>بازرگانی</option><option>هیتر</option>
+    </select>
+  </div>
+  <div class="row"><label>بواری پیشەیی</label>
+    <select name="craft_area">
+      <option>زانستی</option><option>پزیشکی</option><option>سەوزەفرۆش</option><option>شۆفێر</option><option>کرێکار</option><option>وەستا</option><option>نوسەر</option><option>هونەرمەند</option><option>کاری دەستی</option><option>هیتر</option>
+    </select>
+  </div>
+  <div class="row"><label>ژمارەی فەرمانبەران لەبەردەستت</label><input type="number" name="employees_count" min="0"></div>
+  <div class="row"><label>داهاتی تاکەکەسی</label><input name="personal_income"></div>
+  <div class="row"><label>ڕازایت لە کارەکەت؟</label><select name="satisfaction"><option>بەڵێ</option><option>نەخێر</option></select></div>
+  <button class="btn">پاشەکەوت</button>
+</form>
+{% endblock %}

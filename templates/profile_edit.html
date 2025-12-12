@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}دەستکاریکردنی پروفایل{% endblock %}
+{% block head_extra %}
+<script>
+  const countryCodes = {{ countries|tojson if countries is defined else '{}' }};
+  function updateCode(){ const sel=document.getElementById('country');
+    document.getElementById('phone_code').value = countryCodes[sel.value] || ''; }
+  function toggleBank(){ const s=document.getElementById('has_bank_card').value;
+    document.getElementById('bank_section').style.display = (s==='بەڵێ') ? '' : 'none'; }
+  window.addEventListener('DOMContentLoaded',()=>{ updateCode(); toggleBank(); });
+</script>
+{% endblock %}
+{% block content %}
+  <h2>دەستکاریکردنی پروفایل</h2>
+  {% set ints = (row['interests'] or '').split(',') %}
+  <form method="post">
+    <label>بڕوانامە:</label><br>
+    <select name="degree" required>
+      {% for v in ['none','سەرەتایی','ناوەندی','ئامادەیی','دبلۆم','بكالۆریۆس','دبلۆمی باڵا','ماستەر','دکتۆرا'] %}
+        <option value="{{ v }}" {{ 'selected' if row['degree']==v else '' }}>{{ v }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>تەمەن:</label><br><input type="number" name="age" min="18" value="{{ row['age'] }}" required><br><br>
+
+    <label>حەزەکان:</label><br>
+    {% for k in ['دەروونی','جەنگ','ناوخۆی','جیهانی','ژینگە','تەکنەلۆژیا'] %}
+      <label><input type="checkbox" name="interests" value="{{ k }}" {{ 'checked' if k in ints else '' }}> {{ k }}</label><br>
+    {% endfor %}<br>
+
+    <label>شوێنی نیشتەجێبوون:</label><br>
+    <select name="location" required>{% for v in locations %}<option {{ 'selected' if row['location']==v else '' }}>{{ v }}</option>{% endfor %}</select><br><br>
+
+    <label>باری خێزان:</label><br>
+    <select name="family_status" required>{% for v in family_opts %}<option {{ 'selected' if row['family_status']==v else '' }}>{{ v }}</option>{% endfor %}</select><br><br>
+
+    <label>شار:</label><br>
+    <select name="city" required>{% for c in cities %}<option {{ 'selected' if row['city']==c else '' }}>{{ c }}</option>{% endfor %}</select><br><br>
+
+    <label>دامەزراوە حکومیەکان:</label><br>
+    <select name="importance" required>{% for v in importance_opts %}<option {{ 'selected' if row['importance']==v else '' }}>{{ v }}</option>{% endfor %}</select><br><br>
+
+    <label>ئەندامی حزبی؟</label><br>
+    {% for v in ['بەڵێ','نەخێر'] %}
+      <label><input type="radio" name="political_member" value="{{ v }}" {{ 'checked' if row['political_member']==v else '' }}> {{ v }}</label><br>
+    {% endfor %}<br>
+
+    <hr>
+    <label>وڵات:</label><br>
+    <select id="country" name="country" onchange="updateCode()" required>
+      {% for name, code in countries.items() %}
+        <option value="{{ name }}" {{ 'selected' if row['country']==name else '' }}>{{ name }}</option>
+      {% endfor %}
+    </select><br><br>
+
+    <label>کۆدی نێودەوڵەتی:</label><br><input id="phone_code" name="phone_code" type="text" value="{{ row['phone_code'] or '' }}" readonly required><br><br>
+    <label>ژمارەی مۆبایل:</label><br><input type="tel" name="phone" value="{{ row['phone'] or '' }}" required><br><br>
+
+    <label>ئایا کارتی بانکی بەکار دەهێنیت؟</label><br>
+    <select name="has_bank_card" id="has_bank_card" onchange="toggleBank()">
+      {% for v in ['نەخێر','بەڵێ'] %}<option value="{{ v }}" {{ 'selected' if (row['has_bank_card'] or 'نەخێر')==v else '' }}>{{ v }}</option>{% endfor %}
+    </select><br><br>
+
+    <div id="bank_section" style="display:none;">
+      <label>جۆری کارت:</label><br>
+      <select name="bank_card_type">{% for b in bank_types %}<option value="{{ b }}" {{ 'selected' if row['bank_card_type']==b else '' }}>{{ b }}</option>{% endfor %}</select><br><br>
+      <label>ژمارەی کارت/حیساب:</label><br><input type="text" name="bank_card_number" value="{{ row['bank_card_number'] or '' }}"><br><br>
+    </div>
+
+    <button class="btn" type="submit">پاشەکەوت</button>
+  </form>
+{% endblock %}
